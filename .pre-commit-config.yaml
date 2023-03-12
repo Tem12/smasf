@@ -1,0 +1,67 @@
+default_language_version:
+  python: python
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v2.3.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: ^.*\.md$
+      - id: end-of-file-fixer
+      - id: debug-statements
+      - id: no-commit-to-branch
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: detect-private-key
+      - id: detect-aws-credentials
+        args: [--allow-missing-credentials]
+      - id: check-merge-conflict
+
+  - repo: https://github.com/jorisroovers/gitlint
+    rev: v0.12.0
+    hooks:
+      - id: gitlint
+
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.17.0
+    hooks:
+      - id: yamllint
+
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.18.0
+    hooks:
+      - id: markdownlint
+        language_version: system
+
+  - repo: https://github.com/timothycrosley/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+
+  - repo: https://github.com/ambv/black
+    rev: 20.8b1
+    hooks:
+      - id: black
+        additional_dependencies: ['click==8.0.4']
+
+  - repo: https://github.com/PyCQA/pylint
+    rev: pylint-2.7.2
+    hooks:
+      - id: pylint
+        exclude: ^(docs/).*$
+        # disabled import-error as may be run out of environment with deps
+        args:
+          - --disable=import-error,no-name-in-module
+
+  #- repo: https://github.com/PyCQA/pydocstyle
+  #  rev: 4.0.1
+  #  hooks:
+  #    - id: pydocstyle
+
+  - repo: https://github.com/detailyang/pre-commit-shell.git
+    rev: v1.0.6
+    hooks:
+      - id: shell-lint
+        # disable warnings about removing `function` keyword.
+        # (bash/zsh/.. will be used anyway. sh syntaxt is just for compatiblity
+        args: ["-e", "SC2112", "-e", "SC2039", "-x"]
