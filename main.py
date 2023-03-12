@@ -5,6 +5,8 @@ Date: 12.3.2023
 """
 import argparse
 
+from base.logs import create_logger
+
 
 def parse_args():
     """Parse all program arguments."""
@@ -25,6 +27,13 @@ def main():
     """Main function of whole program."""
     args = parse_args()
     print(args.blockchain)
+    #  rozvetvenie podla args
+    # yaml configy
+    # try how is working nested logging
+
+    log = create_logger("main")
+    log.info("logging")
+    print(log)
 
 
 if __name__ == "__main__":
