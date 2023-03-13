@@ -7,7 +7,9 @@ Date: 12.3.2023
 from base.logs import create_logger
 
 
-def run():
+def run(simulation_config: dict):
     """Run function."""
     log = create_logger("fruitchain")
     log.info("Mediator in Fruitchain")
+    print(type(simulation_config))
+    print(simulation_config)

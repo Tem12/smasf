@@ -5,6 +5,8 @@ Date: 12.3.2023
 """
 import argparse
 
+import yaml
+
 from base.logs import create_logger
 from fruitchain.mediator import run as fruitchain_run
 from nakamoto.mediator import run as nakamoto_run
@@ -27,19 +29,41 @@ def parse_args():
     return parser.parse_args()
 
 
+def load_simulations_config(config_path: str) -> dict:
+    """Load config from yaml file.
+
+    :param config_path: path to yaml config for loading
+    :return: config: loaded config
+    """
+    with open(config_path, "r") as file:
+        config = yaml.load(file, Loader=yaml.FullLoader)
+
+    return config
+
+
 def main():
     """Main function of whole program."""
     args = parse_args()
     if args.blockchain == "nakamoto":
-        nakamoto_run()
-    elif args.blockchain == "subchain":
-        subchain_run()
-    elif args.blockchain == "strongchain":
-        strongchain_run()
-    else:
-        fruitchain_run()
+        simulations_config = load_simulations_config("nakamoto/config.yaml")
+        for simulation_config in simulations_config:
+            nakamoto_run(simulation_config)
 
-    # yaml configy
+    elif args.blockchain == "subchain":
+        simulations_config = load_simulations_config("subchain/config.yaml")
+        for simulation_config in simulations_config:
+            subchain_run(simulation_config)
+
+    elif args.blockchain == "strongchain":
+        simulations_config = load_simulations_config("strongchain/config.yaml")
+        for simulation_config in simulations_config:
+            strongchain_run(simulation_config)
+
+    else:
+        simulations_config = load_simulations_config("fruitchain/config.yaml")
+        for simulation_config in simulations_config:
+            fruitchain_run(simulation_config)
+
     # try how is working nested logging
 
     log = create_logger("main")
