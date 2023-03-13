@@ -6,6 +6,10 @@ Date: 12.3.2023
 import argparse
 
 from base.logs import create_logger
+from fruitchain.mediator import run as fruitchain_run
+from nakamoto.mediator import run as nakamoto_run
+from strongchain.mediator import run as strongchain_run
+from subchain.mediator import run as subchain_run
 
 
 def parse_args():
@@ -26,8 +30,15 @@ def parse_args():
 def main():
     """Main function of whole program."""
     args = parse_args()
-    print(args.blockchain)
-    #  rozvetvenie podla args
+    if args.blockchain == "nakamoto":
+        nakamoto_run()
+    elif args.blockchain == "subchain":
+        subchain_run()
+    elif args.blockchain == "strongchain":
+        strongchain_run()
+    else:
+        fruitchain_run()
+
     # yaml configy
     # try how is working nested logging
 
