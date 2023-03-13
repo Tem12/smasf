@@ -4,14 +4,11 @@ Author: Jan Jakub Kubik (xkubik32)
 Date: 12.3.2023
 """
 import argparse
+import importlib
 
 import yaml
 
 from base.logs import create_logger
-from fruitchain.mediator import run as fruitchain_run
-from nakamoto.mediator import run as nakamoto_run
-from strongchain.mediator import run as strongchain_run
-from subchain.mediator import run as subchain_run
 
 
 def parse_args():
@@ -41,28 +38,22 @@ def load_simulations_config(config_path: str) -> dict:
     return config
 
 
+def run_simulations(blockchain: str):
+    """Run selfish mining simulations.
+    Run selfish mining simulations according to yaml config for selected consensus protocol.
+
+    :param blockchain: blockchain name for simulation
+    """
+    mediator = importlib.import_module(blockchain + "." + "mediator")
+    simulations_config = load_simulations_config(blockchain + "/" + "config.yaml")
+    for simulation_config in simulations_config:
+        mediator.run(simulation_config)
+
+
 def main():
     """Main function of whole program."""
     args = parse_args()
-    if args.blockchain == "nakamoto":
-        simulations_config = load_simulations_config("nakamoto/config.yaml")
-        for simulation_config in simulations_config:
-            nakamoto_run(simulation_config)
-
-    elif args.blockchain == "subchain":
-        simulations_config = load_simulations_config("subchain/config.yaml")
-        for simulation_config in simulations_config:
-            subchain_run(simulation_config)
-
-    elif args.blockchain == "strongchain":
-        simulations_config = load_simulations_config("strongchain/config.yaml")
-        for simulation_config in simulations_config:
-            strongchain_run(simulation_config)
-
-    else:
-        simulations_config = load_simulations_config("fruitchain/config.yaml")
-        for simulation_config in simulations_config:
-            fruitchain_run(simulation_config)
+    run_simulations(args.blockchain)
 
     # try how is working nested logging
 
