@@ -16,7 +16,7 @@ def parse_args():
     parser.add_argument(
         "blockchain",
         choices=["nakamoto", "subchain", "strongchain", "fruitchain"],
-        type=str,
+        type=str.lower,
         help="Select blockchain network where you want to simulate selfish mining",
     )
 
