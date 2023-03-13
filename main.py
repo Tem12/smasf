@@ -1,4 +1,4 @@
-"""Module providingFunction printing python version.
+"""Main module of whole program.
 
 Author: Jan Jakub Kubik (xkubik32)
 Date: 12.3.2023
