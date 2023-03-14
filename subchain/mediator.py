@@ -2,14 +2,22 @@
 whole simulation of selfish mining for Subchain consensus.
 
 Author: Jan Jakub Kubik (xkubik32)
-Date: 13.3.2023
+Date: 14.3.2023
 """
-from base.logs import create_logger
+
+from base.mediator_base import MediatorBase
 
 
-def run(simulation_config: dict):
-    """Run function."""
-    log = create_logger("subchain")
-    log.info("Mediator in Subchain")
-    print(type(simulation_config))
-    print(simulation_config)
+class Mediator(MediatorBase):
+    """Mediator class for Subchain consensus for running whole simulation."""
+
+    def run(self):
+        """This method is entry point for running all checks for specific provider monitor."""
+        self.log.info("Mediator in Subchain")
+        print(type(self.config))
+        print(self.config)
+
+    def parse_config(self, simulation_config):
+        """Parsing dict from yaml config."""
+        self.log.info("Subchain parse config method")
+        return simulation_config
