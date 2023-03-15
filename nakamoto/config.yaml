@@ -6,10 +6,10 @@
       - item2
       - item3
 
-# whole simulation config
-- simulation2:
-    example1: Nakamoto_2
-    example_list:
-      - item2_1
-      - item2_2
-      - item3_3
+## whole simulation config
+#- simulation2:
+#    example1: Nakamoto_2
+#    example_list:
+#      - item2_1
+#      - item2_2
+#      - item3_3
