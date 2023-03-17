@@ -1,10 +1,12 @@
 # whole simulation config
 - simulation1:
-    example1: Nakamoto
-    example_list:
-      - item1
-      - item2
-      - item3
+    consensus_name: Nakamoto
+    miners:
+      honest:
+        mining_power: 60
+      selfish:
+        - mining_power: 40
+    gamma: 1
 
 ## whole simulation config
 #- simulation2:
