@@ -16,6 +16,7 @@ class SimulationConfigBase:
     honest_miner: int
     selfish_miners: List[int]
     gamma: float
+    simulation_mining_rounds: int
 
     def __post_init__(self):
         print(self.honest_miner)
@@ -25,3 +26,11 @@ class SimulationConfigBase:
 
         if self.gamma not in [0, 0.5, 1]:
             raise ValueError("Invalid gamma value. Accepted values are 0, 0.5, and 1.")
+
+        if self.simulation_mining_rounds <= 0:
+            raise ValueError("Invalid number of mining rounds. It must be more than 0.")
+
+        if any(sm > 49 for sm in self.selfish_miners):
+            raise ValueError(
+                "Selfish miner can't have above 49% of whole mining power."
+            )

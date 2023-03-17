@@ -34,11 +34,19 @@ class Blockchain(BlockchainBase):
         self.last_block_id += 1
 
     def print_chain(self):
-        print(f"Lead: {self.lead}")
+        print(f"Lead: {self.owner}")
         for index, block in enumerate(self.chain):
             print(f"Block {index}:")
             print(f"  Data: {block.data}")
             print(f"  Miner: {block.miner}")
 
     def to_dict(self) -> Dict[str, Any]:
-        return {"chain": [block.to_dict() for block in self.chain], "lead": self.lead}
+        return {"chain": [block.to_dict() for block in self.chain], "lead": self.owner}
+
+    def size(self) -> int:
+        """Get length of the blockchain."""
+        return len(self.chain)
+
+    def length(self) -> int:
+        """Get length of private chain."""
+        return self.size() + self.fork_block_id
