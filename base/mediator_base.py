@@ -26,10 +26,17 @@ class MediatorBase(ABC):
         """This method is entry point for running all checks for specific provider monitor."""
         raise NotImplementedError
 
-    @abstractmethod
-    def validate_blockchain_config(self):
-        """Validation of blockchain simulation configuration from yaml config."""
-        raise NotImplementedError
+    def validate_blockchain_config_keys(
+        self, dictionary: dict, expected_keys: set
+    ) -> None:
+        """Top level keys validation of parsed simulation config."""
+        self.log.info("validating simulation config")
+        dict_keys = set(dictionary.keys())
+        if dict_keys != expected_keys:
+            raise ValueError(
+                f"You are missing or you have used redundant top level keys in YAML config."
+                f" Please use just these keys: {expected_keys}"
+            )
 
     def __call_parse_config(self, simulation_config: dict):
         """Call defined parse_config ."""
