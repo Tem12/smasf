@@ -3,12 +3,12 @@
     consensus_name: Nakamoto
     miners:
       honest:
-        mining_power: 60
+        mining_power: 75
       selfish:
-        - mining_power: 40
-    gamma: 1
+        - mining_power: 25
+    gamma: 0.5
+    simulation_mining_rounds: 200_000
 
-## whole simulation config
 #- simulation2:
 #    example1: Nakamoto_2
 #    example_list:

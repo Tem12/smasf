@@ -70,10 +70,6 @@ class SelfishMinerStrategyBase(MinerStrategyBase, ABC):
     def __init__(self, mining_power):
         super().__init__(mining_power)
         self.miner_type = MinerType.SELFISH
-        if not hasattr(self, "private_blockchain"):
-            raise NotImplementedError(
-                'Subclass must initialize the "private_blockchain" variable.'
-            )
 
     def setup_next_action(self):
         """Base selfish miner method for setting up the action after public blockchain update."""

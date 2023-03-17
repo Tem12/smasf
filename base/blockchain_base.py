@@ -36,7 +36,7 @@ class BlockchainBase(ABC):
     """BlockchainBase class is base class for blockchain in all consensus protocols."""
 
     chain: list = field(default_factory=list)
-    lead: str = "Main chain"
+    owner: str = "Main chain"
     last_block_id: int = 0
     fork_block_id: int = None
 
