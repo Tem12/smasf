@@ -51,7 +51,7 @@ repos:
         exclude: ^(docs/).*$
         # disabled import-error as may be run out of environment with deps
         args:
-          - --disable=import-error,no-name-in-module
+          - --disable=import-error,no-name-in-module,too-few-public-methods
 
   #- repo: https://github.com/PyCQA/pydocstyle
   #  rev: 4.0.1

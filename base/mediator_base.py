@@ -4,6 +4,7 @@ from which is inherited in all blockchain mediators.
 Author: Jan Jakub Kubik (xkubik32)
 Date: 14.3.2023
 """
+import random
 from abc import ABC, abstractmethod
 
 from base.logs import create_logger
@@ -25,6 +26,25 @@ class MediatorBase(ABC):
     def run(self):
         """This method is entry point for running all checks for specific provider monitor."""
         raise NotImplementedError
+
+    @abstractmethod
+    def resolve_overrides(self):
+        """This method is used after one or multiple attackers
+        after `decide_next_action` have `override` action.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def resolve_matches(self):
+        """This method is used after one or multiple attackers
+        after `decide_next action` have `match` action.
+        """
+        raise NotImplementedError
+
+    @staticmethod
+    def choose_leader(choices, weights):
+        """Select according weights leader of current round."""
+        return random.choices(choices, weights, k=1)[0]
 
     def validate_blockchain_config_keys(
         self, dictionary: dict, expected_keys: set

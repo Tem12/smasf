@@ -46,11 +46,6 @@ class MinerStrategyBase:
         self.log = create_logger(str(self.miner_id))
 
     @abstractmethod
-    def run(self):
-        """Base method for running the business logic of miner."""
-        raise NotImplementedError
-
-    @abstractmethod
     def mine_new_block(self):
         """Base method for running the business logic of miner if he mines a new block."""
         raise NotImplementedError
@@ -71,7 +66,7 @@ class SelfishMinerStrategyBase(MinerStrategyBase, ABC):
         super().__init__(mining_power)
         self.miner_type = MinerType.SELFISH
 
-    def setup_next_action(self):
+    def decide_next_action(self):
         """Base selfish miner method for setting up the action after public blockchain update."""
         raise NotImplementedError
 
