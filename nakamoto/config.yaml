@@ -7,7 +7,7 @@
       selfish:
         - mining_power: 25
     gamma: 0.5
-    simulation_mining_rounds: 200_000
+    simulation_mining_rounds: 100_000
 
 #- simulation2:
 #    example1: Nakamoto_2

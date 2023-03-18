@@ -167,13 +167,19 @@ class Mediator(MediatorBase):
                 )
                 one_sm = self.selfish_miners[0]
                 if ongoing_fork:
-                    if random.random() <= 0.5:
-                        print("Previous block won selfish miner")
-                        orphaned_blocks.append(self.public_blockchain.chain[-1])
-                        self.public_blockchain.chain[-1] = one_sm.blockchain.chain[-1]
-                        ongoing_fork = False
-                        one_sm.blockchain.chain = []
-                        one_sm.blockchain.fork_block_id = None
+                    ongoing_fork = False
+                    if self.config.gamma == 0.5:
+                        res = leader.mining_power * 0.5 / 100
+                        print(res)
+                        # exit()
+                        if random.random() <= res:
+                            print("Previous block won selfish miner")
+                            orphaned_blocks.append(self.public_blockchain.chain[-1])
+                            self.public_blockchain.chain[-1] = one_sm.blockchain.chain[
+                                -1
+                            ]
+                            one_sm.blockchain.chain = []
+                            one_sm.blockchain.fork_block_id = None
 
                 self.public_blockchain.add_block(
                     f"Block {blocks_mined} data", f"Honest miner {leader.miner_id}"
@@ -191,6 +197,7 @@ class Mediator(MediatorBase):
                     self.log.info(f"Chain difference is: {chain_difference}")
 
                     if chain_difference >= 2:
+                        # wait action should be published block - but not necessary
                         self.log.info("Nothing to do ....")
 
                     elif chain_difference == 1:
@@ -220,10 +227,11 @@ class Mediator(MediatorBase):
                             one_sm.blockchain.fork_block_id = None
 
                         elif self.config.gamma == 0:  # nothing to do wins honest miner
-                            self.log.info("HM wins.")
-                            orphaned_blocks.append(one_sm.blockchain.chain[-1])
-                            one_sm.blockchain.chain = []
-                            one_sm.blockchain.fork_block_id = None
+                            self.log.info("HM ???.")
+                            ongoing_fork = True
+                            # orphaned_blocks.append(one_sm.blockchain.chain[-1])
+                            # one_sm.blockchain.chain = []
+                            # one_sm.blockchain.fork_block_id = None
 
                         elif self.config.gamma == 0.5:
                             ongoing_fork = True
@@ -258,5 +266,6 @@ class Mediator(MediatorBase):
             block_counts[block.miner] += 1
 
         print(block_counts)
+        # print(self.selfish_miners[0].blockchain.chain)
 
         plot_block_counts(block_counts, miners_info)
