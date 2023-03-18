@@ -6,48 +6,13 @@ Date: 17.3.2023
 """
 import random
 
-import matplotlib.pyplot as plt
-
 from base.mediator_base import MediatorBase
 from base.miner_base import MinerType
 from base.sim_config_base import SimulationConfigBase as SimulationConfig
 from nakamoto.blockchain import Blockchain
 from nakamoto.honest_miner import HonestMinerStrategy
+from nakamoto.my_graphs import plot_block_counts
 from nakamoto.selfish_miner import SelfishMinerStrategy
-
-
-def plot_block_counts(block_counts, miners_info):
-    """Relevant plot for public blockchain statistics."""
-    miner_names = list(block_counts.keys())
-    total_blocks = sum(block_counts.values())
-    block_percentages = [
-        100 * block_counts[name] / total_blocks for name in miner_names
-    ]
-
-    mining_powers = miners_info
-    mining_power_labels = [f"{100 * power:.1f}%" for power in mining_powers]
-
-    bars = plt.bar(miner_names, block_percentages)
-
-    for bar_new, label, miner_name in zip(bars, mining_power_labels, miner_names):
-        height = bar_new.get_height()
-        block_count = block_counts[miner_name]
-        plt.text(
-            bar_new.get_x() + bar_new.get_width() / 2,
-            height,
-            f"{label}\n{block_count} blocks",
-            ha="center",
-            va="bottom",
-            fontsize=10,
-        )
-
-    plt.xlabel("Miner")
-    plt.ylabel("Percentage of Blocks Mined")
-    plt.title(
-        f"Percentage of Blocks Mined by Each Miner (Mining Power and Block "
-        f"Count on Top of Bars)\nTotal Blocks: {total_blocks}"
-    )
-    plt.show()
 
 
 class Mediator(MediatorBase):
@@ -93,10 +58,11 @@ class Mediator(MediatorBase):
             simulation_mining_rounds=sim_config["simulation_mining_rounds"],
         )
 
-    @staticmethod
-    def weighted_random_choice(choices, weights):
-        """Select according weights leader of current round."""
-        return random.choices(choices, weights, k=1)[0]
+    def resolve_matches(self):
+        pass
+
+    def resolve_overrides(self):
+        pass
 
     # pylint: disable=too-many-statements
     # pylint: disable=too-many-branches
@@ -126,7 +92,7 @@ class Mediator(MediatorBase):
         orphaned_blocks = []
 
         while blocks_mined < self.config.simulation_mining_rounds:
-            leader = self.weighted_random_choice(miners, miners_info)
+            leader = self.choose_leader(miners, miners_info)
             blocks_mined += 1
 
             if leader.miner_type == MinerType.SELFISH:  # selfish miner found a block
