@@ -32,7 +32,7 @@ class Mediator(MediatorBase):
         self.action_store = ActionObjectStore()
         self.ongoing_fork = False
 
-    def __parse_config(self, simulation_config):
+    def parse_config(self, simulation_config):
         """Parsing dict from yaml config."""
         self.log.info("Nakamoto parse config method")
 
@@ -62,7 +62,7 @@ class Mediator(MediatorBase):
             simulation_mining_rounds=sim_config["simulation_mining_rounds"],
         )
 
-    def __resolve_matches(self, match_competitors, ongoing_fork):
+    def resolve_matches(self, match_competitors, ongoing_fork):
         # !!! WORKS just for 1 attacker
         match_obj = self.action_store.get_objects(SA.MATCH)[0]
 
@@ -79,7 +79,7 @@ class Mediator(MediatorBase):
         elif self.config.gamma == 0.5:
             self.ongoing_fork = True
 
-    def __resolve_overrides(self):
+    def resolve_overrides(self):
         self.log.info("resolve_overrides")
         # !!! WORKS just for 1 attacker
         match_obj = self.action_store.get_objects(SA.OVERRIDE)[0]
@@ -144,10 +144,10 @@ class Mediator(MediatorBase):
                 all_actions = self.action_store.get_actions()
 
                 if SA.OVERRIDE in all_actions:
-                    self.__resolve_overrides()
+                    self.resolve_overrides()
 
                 elif SA.MATCH in all_actions:
-                    self.__resolve_matches(match_competitors, self.ongoing_fork)
+                    self.resolve_matches(match_competitors, self.ongoing_fork)
                     match_competitors.add(self.selfish_miners[0])
                     break  # end mining round
 

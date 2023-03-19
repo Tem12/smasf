@@ -7,6 +7,7 @@ Date: 15.3.2023
 from abc import ABC, abstractmethod
 from enum import Enum
 from itertools import count
+from typing import Any, List
 
 from base.logs import create_logger
 
@@ -39,7 +40,7 @@ class MinerStrategyBase:
 
     counter = count(start=42)
 
-    def __init__(self, mining_power):
+    def __init__(self, mining_power: float):
         self.action = None
         self.mining_power = mining_power
         self.miner_id = next(self.counter)
@@ -48,18 +49,23 @@ class MinerStrategyBase:
     # pylint: disable=too-many-arguments
     @abstractmethod
     def mine_new_block(
-        self, mining_round, public_blockchain, ongoing_fork, match_competitors, gamma
-    ):
+        self,
+        mining_round: int,
+        public_blockchain: Any,
+        ongoing_fork: Any,
+        match_competitors: List[int],
+        gamma: float,
+    ) -> None:
         """Base method for running the business logic of miner if he mines a new block."""
         raise NotImplementedError
 
-    def get_and_reset_action(self):
+    def get_and_reset_action(self) -> Any:
         """Get action attribute and reset it."""
         action = self.action
         self.action = None
         return action
 
-    def get_action(self):
+    def get_action(self) -> Any:
         """Get action attribute."""
         return self.action
 
@@ -67,7 +73,7 @@ class MinerStrategyBase:
 class HonestMinerStrategyBase(MinerStrategyBase, ABC):
     """General base class for honest miner."""
 
-    def __init__(self, mining_power):
+    def __init__(self, mining_power: float):
         super().__init__(mining_power)
         self.miner_type = MinerType.HONEST
 
@@ -75,14 +81,16 @@ class HonestMinerStrategyBase(MinerStrategyBase, ABC):
 class SelfishMinerStrategyBase(MinerStrategyBase, ABC):
     """General base class for selfish miner."""
 
-    def __init__(self, mining_power):
+    def __init__(self, mining_power: float):
         super().__init__(mining_power)
         self.miner_type = MinerType.SELFISH
 
-    def decide_next_action(self, public_blockchain, leader):
+    def decide_next_action(self, public_blockchain: Any, leader: int) -> None:
         """Base selfish miner method for setting up the action after public blockchain update."""
         raise NotImplementedError
 
-    def update_private_blockchain(self, public_blockchain, mining_round):
+    def update_private_blockchain(
+        self, public_blockchain: Any, mining_round: int
+    ) -> None:
         """Base selfish miner method for updating his private blockchain."""
         raise NotImplementedError

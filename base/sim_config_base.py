@@ -10,7 +10,15 @@ from typing import List
 
 @dataclass
 class SimulationConfigBase:
-    """Dataclass for simulation config."""
+    """Dataclass for simulation config.
+
+    Attributes:
+        consensus_name (str): Name of the consensus algorithm.
+        honest_miner (int): Mining power percentage of the honest miner.
+        selfish_miners (List[int]): List of mining power percentages for selfish miners.
+        gamma (float): Gamma value, used in some consensus algorithms.
+        simulation_mining_rounds (int): Number of mining rounds in the simulation.
+    """
 
     consensus_name: str
     honest_miner: int
@@ -18,7 +26,8 @@ class SimulationConfigBase:
     gamma: float
     simulation_mining_rounds: int
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
+        """Perform data validation after initialization."""
         print(self.honest_miner)
         print(self.selfish_miners)
         if self.honest_miner + sum(self.selfish_miners) != 100:

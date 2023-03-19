@@ -13,16 +13,15 @@ import structlog
 def _create(
     name: str, get_logger_func: Callable, logging_options=logging
 ) -> Union[logging.Logger, structlog.BoundLogger]:
-    """Functions for creating logger
-
-    Creates logger with given name.
+    """Create a logger with the given name.
 
     Args:
-        name: name of the logger
-        get_logger_func: function for creating logger object
+        name (str): Name of the logger.
+        get_logger_func (Callable): Function for creating logger object.
+        logging_options (Optional): Logging options. Default is Python's logging module.
 
     Returns:
-        Logger object based on get_logger_func
+        Union[logging.Logger, structlog.BoundLogger]: Logger object based on get_logger_func.
     """
     logging.setLoggerClass(logging_options.Logger)
     logger = get_logger_func(name)
@@ -31,17 +30,17 @@ def _create(
 
 
 def create_logger(name: str) -> structlog.BoundLogger:
-    """Creates logger with given name
+    """Create a logger with the given name.
 
-    Creates object of structlog for logging with given name
+    Create a structlog logger object with the given name.
 
     Args:
-        name: name of the logger
+        name (str): Name of the logger.
 
     Returns:
-        Structlog object with given name
+        structlog.BoundLogger: Structlog logger object with the given name.
     """
-    # same as default processors, just without timestamps
+    # Same as default processors, just without timestamps
     structlog.configure(
         processors=[
             structlog.processors.StackInfoRenderer(),
