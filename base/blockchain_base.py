@@ -14,6 +14,7 @@ class BlockBase(ABC):
 
     data: str
     miner: str = None
+    miner_id: int = None
 
     @abstractmethod
     def __iter__(self):
@@ -41,7 +42,7 @@ class BlockchainBase(ABC):
     fork_block_id: int = None
 
     @abstractmethod
-    def add_block(self, data, miner):
+    def add_block(self, data, miner, miner_id):
         """Add newly mined block to the blockchain."""
         raise NotImplementedError
 
