@@ -45,10 +45,23 @@ class MinerStrategyBase:
         self.miner_id = next(self.counter)
         self.log = create_logger(str(self.miner_id))
 
+    # pylint: disable=too-many-arguments
     @abstractmethod
-    def mine_new_block(self):
+    def mine_new_block(
+        self, mining_round, public_blockchain, ongoing_fork, match_competitors, gamma
+    ):
         """Base method for running the business logic of miner if he mines a new block."""
         raise NotImplementedError
+
+    def get_and_reset_action(self):
+        """Get action attribute and reset it."""
+        action = self.action
+        self.action = None
+        return action
+
+    def get_action(self):
+        """Get action attribute."""
+        return self.action
 
 
 class HonestMinerStrategyBase(MinerStrategyBase, ABC):
@@ -66,10 +79,10 @@ class SelfishMinerStrategyBase(MinerStrategyBase, ABC):
         super().__init__(mining_power)
         self.miner_type = MinerType.SELFISH
 
-    def decide_next_action(self):
+    def decide_next_action(self, public_blockchain, leader):
         """Base selfish miner method for setting up the action after public blockchain update."""
         raise NotImplementedError
 
-    def update_private_blockchain(self):
+    def update_private_blockchain(self, public_blockchain, mining_round):
         """Base selfish miner method for updating his private blockchain."""
         raise NotImplementedError

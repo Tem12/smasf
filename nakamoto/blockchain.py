@@ -16,20 +16,25 @@ class Block(BlockBase):
     def __iter__(self):
         yield self.data
         yield self.miner
+        yield self.miner_id
 
     def __repr__(self):
-        return f"Block(data={self.data}, miner={self.miner})"
+        return f"Block(data={self.data}, miner={self.miner}, miner_id={self.miner_id})"
 
     def to_dict(self) -> Dict[str, Any]:
-        return {"data": self.data, "miner": self.miner}
+        return {"data": self.data, "miner": self.miner, "miner_id": self.miner_id}
 
 
 @dataclass
 class Blockchain(BlockchainBase):
     """Blockchain class is class for Nakamoto consensus blockchain."""
 
-    def add_block(self, data, miner):
-        new_block = Block(data, miner)
+    def initialize(self, fork_block_id):
+        """This method is for selfish miner blockchain initialization after fork."""
+        self.fork_block_id = fork_block_id
+
+    def add_block(self, data, miner, miner_id):
+        new_block = Block(data, miner, miner_id)
         self.chain.append(new_block)
         self.last_block_id += 1
 

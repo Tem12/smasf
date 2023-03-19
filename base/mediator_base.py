@@ -10,6 +10,77 @@ from abc import ABC, abstractmethod
 from base.logs import create_logger
 
 
+class ActionObjectStore:
+    """A container for storing objects associated with actions.
+
+    The ActionObjectStore class provides a convenient way to store objects
+    that are associated with specific actions. It allows adding and removing
+    objects, retrieving objects for a given action, getting the list of all
+    actions, and clearing the entire store.
+
+    Attributes:
+        _store (dict): A dictionary containing lists of objects keyed by actions.
+        _all_actions (list): A list of all actions in the store.
+    """
+
+    def __init__(self):
+        """Initialize the ActionObjectStore with an empty store and an empty list of actions."""
+        self._store = {}
+        self._all_actions = []
+
+    def add_object(self, action, obj=None):
+        """Add an object associated with the given action to the store.
+
+        Args:
+            action: The action to associate with the object.
+            obj: The object to store (default is None).
+        """
+        if action not in self._store:
+            self._store[action] = [obj]
+        else:
+            self._store[action].append(obj)
+
+        self._all_actions.append(action)
+
+    def remove_object(self, action, obj=None):
+        """Remove an object associated with the given action from the store.
+
+        Args:
+            action: The action associated with the object.
+            obj: The object to remove (default is None).
+        """
+        if action in self._store and obj in self._store[action]:
+            self._store[action].remove(obj)
+            self._all_actions.remove(action)
+
+            if not self._store[action]:
+                del self._store[action]
+
+    def get_objects(self, action):
+        """Retrieve a list of objects associated with the given action.
+
+        Args:
+            action: The action to retrieve objects for.
+
+        Returns:
+            List of objects associated with the action.
+        """
+        return self._store[action]
+
+    def get_actions(self):
+        """Retrieve the list of all actions in the store.
+
+        Returns:
+            List of all actions.
+        """
+        return self._all_actions
+
+    def clear(self):
+        """Clear the store and the list of actions."""
+        self._store.clear()
+        self._all_actions.clear()
+
+
 class MediatorBase(ABC):
     """Abstract base class class for all blockchain mediators."""
 
@@ -18,7 +89,7 @@ class MediatorBase(ABC):
         self.config = self.__call_parse_config(simulation_config)
 
     @abstractmethod
-    def parse_config(self, simulation_config):
+    def __parse_config(self, simulation_config):
         """This method is entry point for running all checks for specific provider monitor."""
         raise NotImplementedError
 
@@ -28,14 +99,14 @@ class MediatorBase(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def resolve_overrides(self):
+    def __resolve_overrides(self):
         """This method is used after one or multiple attackers
         after `decide_next_action` have `override` action.
         """
         raise NotImplementedError
 
     @abstractmethod
-    def resolve_matches(self):
+    def __resolve_matches(self, match_competitors, ongoing_fork):
         """This method is used after one or multiple attackers
         after `decide_next action` have `match` action.
         """
@@ -60,4 +131,4 @@ class MediatorBase(ABC):
 
     def __call_parse_config(self, simulation_config: dict):
         """Call defined parse_config ."""
-        return self.parse_config(simulation_config)
+        return self.__parse_config(simulation_config)
