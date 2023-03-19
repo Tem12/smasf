@@ -5,16 +5,22 @@ Date: 16.3.2023
 """
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Any, Dict
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
 class BlockBase(ABC):
-    """BlocksBase class is base class for blocks in all consensus protocols."""
+    """BlocksBase class is the base class for blocks in all consensus protocols.
+
+    Attributes:
+        data (str): Data stored in the block.
+        miner (Optional[str]): Miner who mined the block.
+        miner_id (Optional[int]): Miner's unique identifier.
+    """
 
     data: str
-    miner: str = None
-    miner_id: int = None
+    miner: Optional[str] = None
+    miner_id: Optional[int] = None
 
     @abstractmethod
     def __iter__(self):
@@ -22,7 +28,7 @@ class BlockBase(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def __repr__(self):
+    def __repr__(self) -> str:
         """String representation."""
         raise NotImplementedError
 
@@ -34,20 +40,27 @@ class BlockBase(ABC):
 
 @dataclass
 class BlockchainBase(ABC):
-    """BlockchainBase class is base class for blockchain in all consensus protocols."""
+    """BlockchainBase class is the base class for blockchain in all consensus protocols.
 
-    chain: list = field(default_factory=list)
-    owner: str = "Main chain"
-    last_block_id: int = 0
-    fork_block_id: int = None
+    Attributes:
+        chain (List): List of blocks in the blockchain.
+        owner (Optional[str]): Owner of the blockchain. Defaults to 'Main chain'.
+        last_block_id (Optional[int]): Identifier of the last block in the blockchain.
+        fork_block_id (Optional[int]): Identifier of the block where the fork starts.
+    """
+
+    chain: List = field(default_factory=list)
+    owner: Optional[str] = "Main chain"
+    last_block_id: Optional[int] = 0
+    fork_block_id: Optional[int] = None
 
     @abstractmethod
-    def add_block(self, data, miner, miner_id):
+    def add_block(self, data: str, miner: str, miner_id: int) -> None:
         """Add newly mined block to the blockchain."""
         raise NotImplementedError
 
     @abstractmethod
-    def print_chain(self):
+    def print_chain(self) -> None:
         """Print whole blockchain."""
         raise NotImplementedError
 

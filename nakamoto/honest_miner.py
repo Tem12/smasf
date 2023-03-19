@@ -15,8 +15,25 @@ class HonestMinerStrategy(HonestMinerStrategyBase):
 
     # pylint: disable=too-many-arguments
     def mine_new_block(
-        self, mining_round, public_blockchain, ongoing_fork, match_competitors, gamma
-    ):
+        self,
+        mining_round: int,
+        public_blockchain: "Blockchain",
+        ongoing_fork: bool,
+        match_competitors: set,
+        gamma: float,
+    ) -> bool:
+        """Mine a new block as an honest miner for the Nakamoto consensus.
+
+        Args:
+            mining_round (int): The current mining round.
+            public_blockchain ('Blockchain'): The public blockchain.
+            ongoing_fork (bool): Indicates if there is an ongoing fork.
+            match_competitors (set): A set of competing selfish miners.
+            gamma (float): The gamma value for the simulation.
+
+        Returns:
+            bool: Whether the fork is ongoing after the block is mined.
+        """
         self.log.info(
             f"Honest miner: {self.miner_id} is leader of round: {mining_round}"
         )
