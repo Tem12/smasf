@@ -30,7 +30,7 @@ class SelfishMinerStrategy(SelfishMinerStrategyBase):
         ongoing_fork: bool,
         match_competitors=None,
         gamma=None,
-    ) -> bool:
+    ) -> None:
         """Mine a new block as a selfish miner for the Nakamoto consensus.
 
         Args:
@@ -40,22 +40,45 @@ class SelfishMinerStrategy(SelfishMinerStrategyBase):
             match_competitors (set, optional): A set of competing selfish miners.
             gamma (float, optional): The gamma value for the simulation.
 
-        Returns:
-            bool: Whether the fork is ongoing after the block is mined.
         """
         self.log.info(
             f"Selfish miner: {self.miner_id} is leader of round: {mining_round}"
         )
-
         self.update_private_blockchain(public_blockchain, mining_round)
 
-        if self.blockchain.size() != 0:
-            if ongoing_fork:
+        if ongoing_fork:
+            first_competitor = list(match_competitors)[0]
+            if (
+                len(match_competitors) == 1
+                and self.miner_id == first_competitor.miner_id
+            ):
+                # only 1 competitor and that's me and I currently mined new block
                 self.action = SA.OVERRIDE
-            else:
-                self.action = SA.WAIT
 
-        return ongoing_fork
+            else:
+                # there is more competitors or the only one and it is not me
+                lead = self.blockchain.size() > first_competitor.blockchain.size()
+                if lead >= 2:
+                    # I have the longest chain and don't care what other does
+                    self.action = SA.WAIT
+
+                elif lead == 1:
+                    # I have the longest chain but just by 1 block
+                    self.action = SA.OVERRIDE
+
+                elif lead == 0:
+                    # competitors have the same length as me
+                    self.action = SA.MATCH
+
+                else:
+                    # competitors have longer chain than me
+                    self.action = SA.ADOPT
+                    self.blockchain.chain = []
+                    self.blockchain.fork_block_id = None
+
+        else:
+            # no ongoing fork I currently mined new block
+            self.action = SA.WAIT
 
     def decide_next_action(self, public_blockchain: "Blockchain", leader: int) -> SA:
         """Decide the next action for the selfish miner.
@@ -68,25 +91,29 @@ class SelfishMinerStrategy(SelfishMinerStrategyBase):
             SA: The next action for the selfish miner.
         """
         if self.blockchain.size() > 0:
-            chain_difference = (
-                self.blockchain.length() - public_blockchain.last_block_id
-            )
+            # selfish miner has private blockchain
+            lead = self.blockchain.length() - public_blockchain.last_block_id
 
-            if chain_difference >= 2:
+            if lead >= 2:
+                # private blockchain is more than 1 blocks longer than public blockchain
                 self.action = SA.WAIT
 
-            elif chain_difference == 1:
+            elif lead == 1:
+                # private blockchain is exactly 1 block longer than public blockchain
                 self.action = SA.OVERRIDE
 
-            elif chain_difference == 0:
+            elif lead == 0:
+                # private blockchain has the same length as public blockchain
                 self.action = SA.MATCH
 
             else:
+                # private blockchain is smaller than public blockchain
                 self.blockchain.chain = []
                 self.blockchain.fork_block_id = None
                 self.action = SA.ADOPT
 
         else:
+            # selfish miner has no private blockchain
             self.action = SA.IDLE
 
         return self.action

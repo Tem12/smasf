@@ -66,7 +66,7 @@ class ActionObjectStore:
         Returns:
             List: List of objects associated with the action.
         """
-        return self._store[action]
+        return self._store.get(action, [])
 
     def get_actions(self) -> List:
         """Retrieve the list of all actions in the store.
@@ -112,13 +112,8 @@ class MediatorBase(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def resolve_matches(self, match_competitors: List[Any], ongoing_fork: Any) -> None:
-        """Resolve the 'match' actions in the simulation.
-
-        Args:
-            match_competitors (List[Any]): List of match competitors.
-            ongoing_fork (Any): The ongoing fork information.
-        """
+    def resolve_matches(self) -> None:
+        """Resolve the 'match' actions in the simulation."""
         raise NotImplementedError
 
     @staticmethod
