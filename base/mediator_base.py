@@ -6,7 +6,7 @@ Date: 14.3.2023
 """
 import random
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Set
+from typing import Any, Dict, List, Optional, Set
 
 from base.logs import create_logger
 
@@ -147,13 +147,17 @@ class MediatorBase(ABC):
             )
 
     def general_config_validations(
-        self, simulation_config: Dict[str, Any]
+        self,
+        simulation_config: Dict[str, Any],
+        expected_keys_extra: Optional[List] = (),
     ) -> Dict[str, Any]:
         """
         Validates the general configuration of a simulation.
 
         Args:
             simulation_config (Dict[str, Any]): The simulation configuration dictionary.
+            expected_keys_extra (List): The extra expected keys to validate.
+                                        Bu default it is empty list.
 
         Raises:
             ValueError: If there is not exactly 1 honest miner or no selfish
@@ -169,6 +173,9 @@ class MediatorBase(ABC):
             "gamma",
             "simulation_mining_rounds",
         }
+        for key in expected_keys_extra:
+            expected_keys.add(key)
+
         sim_config: Dict[str, Any] = list(simulation_config.values())[0]
         self.validate_blockchain_config_keys(sim_config, expected_keys)
 
