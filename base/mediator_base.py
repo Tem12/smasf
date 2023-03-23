@@ -6,7 +6,7 @@ Date: 14.3.2023
 """
 import random
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Set
 
 from base.logs import create_logger
 
@@ -145,6 +145,40 @@ class MediatorBase(ABC):
                 f"You are missing or you have used redundant top-level keys in the YAML config."
                 f" Please use just these keys: {expected_keys}"
             )
+
+    def general_config_validations(
+        self, simulation_config: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """
+        Validates the general configuration of a simulation.
+
+        Args:
+            simulation_config (Dict[str, Any]): The simulation configuration dictionary.
+
+        Raises:
+            ValueError: If there is not exactly 1 honest miner or no selfish
+            miners in the configuration.
+
+        Returns:
+            Dict[str, Any]: The validated simulation configuration dictionary.
+        """
+        # check main keys
+        expected_keys: Set[str] = {
+            "consensus_name",
+            "miners",
+            "gamma",
+            "simulation_mining_rounds",
+        }
+        sim_config: Dict[str, Any] = list(simulation_config.values())[0]
+        self.validate_blockchain_config_keys(sim_config, expected_keys)
+
+        miners: Dict[str, Any] = sim_config["miners"]
+        if len(list(miners["honest"])) != 1:
+            raise ValueError("You must setup exactly 1 honest miner")
+        if len(list(miners["selfish"])) == 0:
+            raise ValueError("You must setup at least 1 selfish miner")
+
+        return sim_config
 
     def __call_parse_config(self, simulation_config: Dict[str, Any]) -> Dict[str, Any]:
         return self.parse_config(simulation_config)
