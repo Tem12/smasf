@@ -39,28 +39,13 @@ class Mediator(MediatorBase):
         """Parsing dict from yaml config."""
         self.log.info("Nakamoto parse config method")
 
-        # check main keys
-        expected_keys = {
-            "consensus_name",
-            "miners",
-            "gamma",
-            "simulation_mining_rounds",
-        }
-        sim_config = list(simulation_config.values())[0]
-        self.validate_blockchain_config_keys(sim_config, expected_keys)
-
-        miners = sim_config["miners"]
-        if len(list(miners["honest"])) != 1:
-            raise ValueError("You must setup exactly 1 honest miner")
-        if len(list(miners["selfish"])) == 0:
-            raise ValueError("You must setup at least 1 selfish miner")
-
-        honest_miner = miners["honest"]["mining_power"]
-        selfish_miners = [sm["mining_power"] for sm in miners["selfish"]]
+        sim_config = self.general_config_validations(simulation_config)
         return SimulationConfig(
             consensus_name=sim_config["consensus_name"],
-            honest_miner=honest_miner,
-            selfish_miners=selfish_miners,
+            honest_miner=sim_config["miners"]["honest"]["mining_power"],
+            selfish_miners=[
+                sm["mining_power"] for sm in sim_config["miners"]["selfish"]
+            ],
             gamma=sim_config["gamma"],
             simulation_mining_rounds=sim_config["simulation_mining_rounds"],
         )
@@ -125,86 +110,86 @@ class Mediator(MediatorBase):
             # override automatically solves all ongoing fork
             self.ongoing_fork = False
 
-    # pylint: disable=too-many-branches
+    def one_round(self, leader, round_id):
+        """One round of simulation, where is one new block mined."""
+        res = leader.mine_new_block(
+            mining_round=round_id,
+            public_blockchain=self.public_blockchain,
+            ongoing_fork=self.ongoing_fork,
+            match_competitors=self.action_store.get_objects(SA.MATCH),
+            gamma=self.config.gamma,
+        )
+        # action = leader.get_and_reset_action()
+        action = leader.get_action()
+
+        if leader.miner_type == MinerType.HONEST:
+            # honest miner actions
+            # --------------------
+            if action == HA.PUBLISH:
+                # honest miner is leader and want to publish his new block to the public chain
+                self.public_blockchain.add_block(
+                    f"Block {round_id} data",
+                    f"Honest miner {leader.miner_id}",
+                    leader.miner_id,
+                )
+                self.ongoing_fork = (
+                    res  # only honest miner updates state of ongoing fork
+                )
+            else:
+                raise Exception("Fatal error no fork")
+        else:
+            # selfish miner actions
+            # ---------------------
+            if action == SA.OVERRIDE:
+                # override public blockchain by attacker's private blockchain
+                self.ongoing_fork = False
+                self.log.info(
+                    f"Override by attacker {leader.blockchain.fork_block_id},"
+                    f" {leader.miner_id} in fork"
+                )
+                self.public_blockchain.chain[leader.blockchain.fork_block_id - 1 :] = []
+                self.public_blockchain.chain.extend(leader.blockchain.chain)
+                leader.blockchain.chain = []
+                leader.blockchain.fork_block_id = None
+
+            elif action == SA.WAIT:
+                # wait ends round if there is no ongoing fork
+                if not self.ongoing_fork:
+                    # END ROUND - no ongoing fork and selfish
+                    # round leader is leading in more than 1 blocks
+                    return
+
+            elif action not in [SA.MATCH, SA.ADOPT]:
+                raise Exception("Fatal error ongoing fork")
+
+        while True:
+            # override loop
+            self.action_store.clear()
+
+            for selfish_miner in self.selfish_miners:
+                action = selfish_miner.decide_next_action(
+                    self.public_blockchain, leader
+                )
+                self.action_store.add_object(action, selfish_miner)
+            all_actions = self.action_store.get_actions()
+
+            # replacement for `do-while` which is not in python
+            condition = SA.OVERRIDE in all_actions
+            if not condition:
+                break
+
+            self.resolve_overrides()
+
+        if SA.MATCH in all_actions:
+            self.resolve_matches()
+
     def run_simulation(self):
         """Main business logic for running selfish mining simulation."""
 
         for blocks_mined in range(self.config.simulation_mining_rounds):
             # competitors with match actions
             leader = self.choose_leader(self.miners, self.miners_info)
-
-            res = leader.mine_new_block(
-                mining_round=blocks_mined,
-                public_blockchain=self.public_blockchain,
-                ongoing_fork=self.ongoing_fork,
-                match_competitors=self.action_store.get_objects(SA.MATCH),
-                gamma=self.config.gamma,
-            )
-            # action = leader.get_and_reset_action()
-            action = leader.get_action()
-
-            if leader.miner_type == MinerType.HONEST:
-                # honest miner actions
-                # --------------------
-                if action == HA.PUBLISH:
-                    # honest miner is leader and want to publish his new block to the public chain
-                    self.public_blockchain.add_block(
-                        f"Block {blocks_mined} data",
-                        f"Honest miner {leader.miner_id}",
-                        leader.miner_id,
-                    )
-                    self.ongoing_fork = (
-                        res  # only honest miner updates state of ongoing fork
-                    )
-                else:
-                    raise Exception("Fatal error no fork")
-            else:
-                # selfish miner actions
-                # ---------------------
-                if action == SA.OVERRIDE:
-                    # override public blockchain by attacker's private blockchain
-                    self.ongoing_fork = False
-                    self.log.info(
-                        f"Override by attacker {leader.blockchain.fork_block_id},"
-                        f" {leader.miner_id} in fork"
-                    )
-                    self.public_blockchain.chain[
-                        leader.blockchain.fork_block_id - 1 :
-                    ] = []
-                    self.public_blockchain.chain.extend(leader.blockchain.chain)
-                    leader.blockchain.chain = []
-                    leader.blockchain.fork_block_id = None
-
-                elif action == SA.WAIT:
-                    # wait ends round if there is no ongoing fork
-                    if not self.ongoing_fork:
-                        # END ROUND - no ongoing fork and selfish
-                        # round leader is leading in more than 1 blocks
-                        continue
-
-                elif action not in [SA.MATCH, SA.ADOPT]:
-                    raise Exception("Fatal error ongoing fork")
-
-            while True:
-                # override loop
-                self.action_store.clear()
-
-                for selfish_miner in self.selfish_miners:
-                    action = selfish_miner.decide_next_action(
-                        self.public_blockchain, leader
-                    )
-                    self.action_store.add_object(action, selfish_miner)
-                all_actions = self.action_store.get_actions()
-
-                # replacement for `do-while` which is not in python
-                condition = SA.OVERRIDE in all_actions
-                if not condition:
-                    break
-
-                self.resolve_overrides()
-
-            if SA.MATCH in all_actions:
-                self.resolve_matches()
+            self.one_round(leader, blocks_mined)
 
     def run(self):
         self.log.info("Mediator in Nakamoto")

@@ -55,7 +55,7 @@ class BlockchainBase(ABC):
     fork_block_id: Optional[int] = None
 
     @abstractmethod
-    def add_block(self, data: str, miner: str, miner_id: int) -> None:
+    def add_block(self, data: str, miner: str, miner_id: int, is_weak=False) -> None:
         """Add newly mined block to the blockchain."""
         raise NotImplementedError
 
