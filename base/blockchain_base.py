@@ -1,7 +1,7 @@
 """Module for base class of blocks and blockchain.
 
 Author: Jan Jakub Kubik (xkubik32)
-Date: 16.3.2023
+Date: 23.3.2023
 """
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
@@ -21,6 +21,7 @@ class BlockBase(ABC):
     data: str
     miner: Optional[str] = None
     miner_id: Optional[int] = None
+    is_weak: bool = False
 
     @abstractmethod
     def __iter__(self):
@@ -55,7 +56,7 @@ class BlockchainBase(ABC):
     fork_block_id: Optional[int] = None
 
     @abstractmethod
-    def add_block(self, data: str, miner: str, miner_id: int, is_weak=False) -> None:
+    def add_block(self, data: str, miner: str, miner_id: int, is_weak) -> None:
         """Add newly mined block to the blockchain."""
         raise NotImplementedError
 

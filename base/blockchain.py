@@ -1,7 +1,7 @@
 """Module for class Nakamoto consensus blocks and blockchain.
 
 Author: Jan Jakub Kubik (xkubik32)
-Date: 16.3.2023
+Date: 23.3.2023
 """
 from dataclasses import dataclass
 from typing import Any, Dict
@@ -23,12 +23,21 @@ class Block(BlockBase):
         yield self.data
         yield self.miner
         yield self.miner_id
+        yield self.is_weak
 
     def __repr__(self) -> str:
-        return f"Block(data={self.data}, miner={self.miner}, miner_id={self.miner_id})"
+        return (
+            f"Block(data={self.data}, miner={self.miner}, "
+            f"miner_id={self.miner_id}, is_weak={self.is_weak})"
+        )
 
     def to_dict(self) -> Dict[str, Any]:
-        return {"data": self.data, "miner": self.miner, "miner_id": self.miner_id}
+        return {
+            "data": self.data,
+            "miner": self.miner,
+            "miner_id": self.miner_id,
+            "is_weak": self.is_weak,
+        }
 
 
 @dataclass
@@ -43,8 +52,11 @@ class Blockchain(BlockchainBase):
         """
         self.fork_block_id = fork_block_id
 
-    def add_block(self, data: str, miner: str, miner_id: int) -> None:
-        new_block = Block(data, miner, miner_id)
+    def __iter__(self):
+        return iter(self.chain)
+
+    def add_block(self, data: str, miner: str, miner_id: int, is_weak=False) -> None:
+        new_block = Block(data, miner, miner_id, is_weak)
         self.chain.append(new_block)
         self.last_block_id += 1
 
