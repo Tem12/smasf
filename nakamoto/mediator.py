@@ -6,12 +6,12 @@ Date: 17.3.2023
 """
 import random
 
+from base.blockchain import Blockchain
 from base.mediator_base import ActionObjectStore, MediatorBase
 from base.miner_base import HonestMinerAction as HA
 from base.miner_base import MinerType
 from base.miner_base import SelfishMinerAction as SA
 from base.sim_config_base import SimulationConfigBase as SimulationConfig
-from nakamoto.blockchain import Blockchain
 from nakamoto.honest_miner import HonestMinerStrategy
 from nakamoto.my_graphs import plot_block_counts
 from nakamoto.selfish_miner import SelfishMinerStrategy
@@ -110,7 +110,7 @@ class Mediator(MediatorBase):
             # override automatically solves all ongoing fork
             self.ongoing_fork = False
 
-    def one_round(self, leader, round_id):
+    def one_round(self, leader, round_id, is_weak_block=False):
         """One round of simulation, where is one new block mined."""
         res = leader.mine_new_block(
             mining_round=round_id,
@@ -128,9 +128,10 @@ class Mediator(MediatorBase):
             if action == HA.PUBLISH:
                 # honest miner is leader and want to publish his new block to the public chain
                 self.public_blockchain.add_block(
-                    f"Block {round_id} data",
-                    f"Honest miner {leader.miner_id}",
-                    leader.miner_id,
+                    data=f"Block {round_id} data",
+                    miner=f"Honest miner {leader.miner_id}",
+                    miner_id=leader.miner_id,
+                    is_weak=is_weak_block,
                 )
                 self.ongoing_fork = (
                     res  # only honest miner updates state of ongoing fork

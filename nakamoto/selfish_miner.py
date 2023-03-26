@@ -4,9 +4,9 @@ selfish miner for Nakamoto consensus protocol.
 Author: Jan Jakub Kubik (xkubik32)
 Date: 15.3.2023
 """
+from base.blockchain import Blockchain
 from base.miner_base import SelfishMinerAction as SA
 from base.miner_base import SelfishMinerStrategyBase
-from nakamoto.blockchain import Blockchain
 
 
 class SelfishMinerStrategy(SelfishMinerStrategyBase):
