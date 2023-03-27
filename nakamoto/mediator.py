@@ -106,6 +106,15 @@ class Mediator(MediatorBase):
             # override automatically solves all ongoing fork
             self.ongoing_fork = False
 
+    def add_honest_block(self, round_id, honest_miner, is_weak_block):
+        """Add honest block to public blockchain"""
+        self.public_blockchain.add_block(
+            data=f"Block {round_id} data",
+            miner=f"Honest miner {honest_miner.miner_id}",
+            miner_id=honest_miner.miner_id,
+            is_weak=is_weak_block,
+        )
+
     def one_round(self, leader, round_id, is_weak_block=False):
         """One round of simulation, where is one new block mined."""
         res = leader.mine_new_block(
@@ -123,15 +132,12 @@ class Mediator(MediatorBase):
             # --------------------
             if action == HA.PUBLISH:
                 # honest miner is leader and want to publish his new block to the public chain
-                self.public_blockchain.add_block(
-                    data=f"Block {round_id} data",
-                    miner=f"Honest miner {leader.miner_id}",
-                    miner_id=leader.miner_id,
-                    is_weak=is_weak_block,
+                self.add_honest_block(
+                    round_id=round_id, honest_miner=leader, is_weak_block=is_weak_block
                 )
-                self.ongoing_fork = (
-                    res  # only honest miner updates state of ongoing fork
-                )
+                # only honest miner updates state of ongoing fork
+                self.ongoing_fork = res
+
             else:
                 raise Exception("Fatal error no fork")
         else:
