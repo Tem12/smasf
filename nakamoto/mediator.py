@@ -64,7 +64,8 @@ class Mediator(MediatorBase):
                 pass
             else:
                 # winner is one of attackers, so override last block on public blockchain
-                self.public_blockchain.chain[-1] = winner.blockchain.chain[-1]
+                self.public_blockchain.chain[winner.blockchain.fork_block_id - 1 :] = []
+                self.public_blockchain.chain.extend(winner.blockchain.chain)
                 winner.blockchain.chain = []
                 winner.blockchain.fork_block_id = None
 
@@ -75,7 +76,10 @@ class Mediator(MediatorBase):
             if self.config.gamma == 1:
                 # integrate attacker's last block to the public blockchain
                 self.log.info("SM wins")
-                self.public_blockchain.chain[-1] = match_obj.blockchain.chain[-1]
+                self.public_blockchain.chain[
+                    match_obj.blockchain.fork_block_id - 1 :
+                ] = []
+                self.public_blockchain.chain.extend(match_obj.blockchain.chain)
                 match_obj.blockchain.chain = []
                 match_obj.blockchain.fork_block_id = None
 
