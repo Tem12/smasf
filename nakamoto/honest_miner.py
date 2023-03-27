@@ -40,20 +40,20 @@ class HonestMinerStrategy(HonestMinerStrategyBase):
         if ongoing_fork:
             ongoing_fork = False
             if gamma == 0.5:
-                res = self.mining_power * 0.5 / 100
-                self.log.info(res)
-
-                if random.random() <= res:
-                    self.log.info("Previous block won selfish miner")
+                if random.random() <= 0.5:
+                    self.log.info("Previous blocks won selfish miner")
 
                     wining_selfish_miner = random.choice(match_competitors)
-                    public_blockchain.chain[-1] = wining_selfish_miner.blockchain.chain[
-                        -1
-                    ]
-                    match_competitors.remove(wining_selfish_miner)
-
+                    public_blockchain.chain[
+                        wining_selfish_miner.blockchain.fork_block_id - 1 :
+                    ] = []
+                    public_blockchain.chain.extend(
+                        wining_selfish_miner.blockchain.chain
+                    )
                     wining_selfish_miner.blockchain.chain = []
                     wining_selfish_miner.blockchain.fork_block_id = None
+
+                    match_competitors.remove(wining_selfish_miner)
 
         # public_blockchain.add_block(
         #     f"Block {mining_round} data", f"Honest miner {self.miner_id}", self.miner_id
