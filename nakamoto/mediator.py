@@ -100,7 +100,7 @@ class Mediator(MediatorBase):
 
         # override
         self.public_blockchain.override_chain(match_obj)
-        match_obj.blockchain.clear_private_chain()
+        match_obj.clear_private_chain()
 
         if self.ongoing_fork:
             # override automatically solves all ongoing fork
@@ -151,7 +151,7 @@ class Mediator(MediatorBase):
                     f" {leader.miner_id} in fork"
                 )
                 self.public_blockchain.override_chain(leader)
-                leader.blockchain.clear_private_chain()
+                leader.clear_private_chain()
 
             elif action == SA.WAIT:
                 # wait ends round if there is no ongoing fork

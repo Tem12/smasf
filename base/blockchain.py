@@ -72,11 +72,6 @@ class Blockchain(BlockchainBase):
         self.chain[attacker.blockchain.fork_block_id - 1 :] = []
         self.chain.extend(attacker.blockchain.chain)
 
-    def clear_private_chain(self):
-        """Clear private chain after it overrides of main chain."""
-        self.chain = []
-        self.fork_block_id = None
-
     def to_dict(self) -> Dict[str, Any]:
         return {"chain": [block.to_dict() for block in self.chain], "lead": self.owner}
 

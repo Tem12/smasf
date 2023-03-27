@@ -45,7 +45,7 @@ class HonestMinerStrategy(HonestMinerStrategyBase):
 
                     wining_selfish_miner = random.choice(match_competitors)
                     public_blockchain.override_chain(wining_selfish_miner)
-                    wining_selfish_miner.blockchain.clear_private_chain()
+                    wining_selfish_miner.clear_private_chain()
                     match_competitors.remove(wining_selfish_miner)
 
         # public_blockchain.add_block(
