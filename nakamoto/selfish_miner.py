@@ -22,6 +22,11 @@ class SelfishMinerStrategy(SelfishMinerStrategyBase):
                 'Subclass must initialize the "private_blockchain" variable.'
             )
 
+    def clear_private_chain(self):
+        """Clear private chain after it overrides of main chain."""
+        self.blockchain.chain = []
+        self.blockchain.fork_block_id = None
+
     # pylint: disable=too-many-arguments
     def mine_new_block(
         self,
@@ -72,7 +77,7 @@ class SelfishMinerStrategy(SelfishMinerStrategyBase):
 
                 else:
                     # competitors have longer chain than me
-                    self.blockchain.clear_private_chain()
+                    self.clear_private_chain()
                     self.action = SA.ADOPT
 
         else:
@@ -107,7 +112,7 @@ class SelfishMinerStrategy(SelfishMinerStrategyBase):
 
             else:
                 # private blockchain is smaller than public blockchain
-                self.blockchain.clear_private_chain()
+                self.clear_private_chain()
                 self.action = SA.ADOPT
 
         else:
