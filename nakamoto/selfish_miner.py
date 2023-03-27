@@ -72,9 +72,8 @@ class SelfishMinerStrategy(SelfishMinerStrategyBase):
 
                 else:
                     # competitors have longer chain than me
+                    self.blockchain.clear_private_chain()
                     self.action = SA.ADOPT
-                    self.blockchain.chain = []
-                    self.blockchain.fork_block_id = None
 
         else:
             # no ongoing fork I currently mined new block
@@ -108,8 +107,7 @@ class SelfishMinerStrategy(SelfishMinerStrategyBase):
 
             else:
                 # private blockchain is smaller than public blockchain
-                self.blockchain.chain = []
-                self.blockchain.fork_block_id = None
+                self.blockchain.clear_private_chain()
                 self.action = SA.ADOPT
 
         else:
