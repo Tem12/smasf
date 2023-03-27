@@ -44,15 +44,8 @@ class HonestMinerStrategy(HonestMinerStrategyBase):
                     self.log.info("Previous blocks won selfish miner")
 
                     wining_selfish_miner = random.choice(match_competitors)
-                    public_blockchain.chain[
-                        wining_selfish_miner.blockchain.fork_block_id - 1 :
-                    ] = []
-                    public_blockchain.chain.extend(
-                        wining_selfish_miner.blockchain.chain
-                    )
-                    wining_selfish_miner.blockchain.chain = []
-                    wining_selfish_miner.blockchain.fork_block_id = None
-
+                    public_blockchain.override_chain(wining_selfish_miner)
+                    wining_selfish_miner.blockchain.clear_private_chain()
                     match_competitors.remove(wining_selfish_miner)
 
         # public_blockchain.add_block(

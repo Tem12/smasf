@@ -64,10 +64,8 @@ class Mediator(MediatorBase):
                 pass
             else:
                 # winner is one of attackers, so override last block on public blockchain
-                self.public_blockchain.chain[winner.blockchain.fork_block_id - 1 :] = []
-                self.public_blockchain.chain.extend(winner.blockchain.chain)
-                winner.blockchain.chain = []
-                winner.blockchain.fork_block_id = None
+                self.public_blockchain.override_chain(winner)
+                winner.clear_private_chain()
 
         elif len(match_objects) == 1:
             # just one attacker in match phase
@@ -76,12 +74,8 @@ class Mediator(MediatorBase):
             if self.config.gamma == 1:
                 # integrate attacker's last block to the public blockchain
                 self.log.info("SM wins")
-                self.public_blockchain.chain[
-                    match_obj.blockchain.fork_block_id - 1 :
-                ] = []
-                self.public_blockchain.chain.extend(match_obj.blockchain.chain)
-                match_obj.blockchain.chain = []
-                match_obj.blockchain.fork_block_id = None
+                self.public_blockchain.override_chain(match_obj)
+                match_obj.clear_private_chain()
 
             else:
                 # gamma is 0 or 0.5. If 0 give attacker 1 round chance to mine new block
@@ -105,10 +99,8 @@ class Mediator(MediatorBase):
             match_obj = random.choice(match_attackers)
 
         # override
-        self.public_blockchain.chain[match_obj.blockchain.fork_block_id - 1 :] = []
-        self.public_blockchain.chain.extend(match_obj.blockchain.chain)
-        match_obj.blockchain.chain = []
-        match_obj.blockchain.fork_block_id = None
+        self.public_blockchain.override_chain(match_obj)
+        match_obj.blockchain.clear_private_chain()
 
         if self.ongoing_fork:
             # override automatically solves all ongoing fork
@@ -152,10 +144,8 @@ class Mediator(MediatorBase):
                     f"Override by attacker {leader.blockchain.fork_block_id},"
                     f" {leader.miner_id} in fork"
                 )
-                self.public_blockchain.chain[leader.blockchain.fork_block_id - 1 :] = []
-                self.public_blockchain.chain.extend(leader.blockchain.chain)
-                leader.blockchain.chain = []
-                leader.blockchain.fork_block_id = None
+                self.public_blockchain.override_chain(leader)
+                leader.blockchain.clear_private_chain()
 
             elif action == SA.WAIT:
                 # wait ends round if there is no ongoing fork
