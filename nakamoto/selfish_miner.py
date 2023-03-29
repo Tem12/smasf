@@ -84,6 +84,10 @@ class SelfishMinerStrategy(SelfishMinerStrategyBase):
             # no ongoing fork I currently mined new block
             self.action = SA.WAIT
 
+    def lead_length(self, public_blockchain):
+        """Method for computing leading of selfish miner in comparison to honest miner."""
+        return self.blockchain.length() - public_blockchain.last_block_id
+
     def decide_next_action(self, public_blockchain: "Blockchain", leader: int) -> SA:
         """Decide the next action for the selfish miner.
 
@@ -96,7 +100,7 @@ class SelfishMinerStrategy(SelfishMinerStrategyBase):
         """
         if self.blockchain.size() > 0:
             # selfish miner has private blockchain
-            lead = self.blockchain.length() - public_blockchain.last_block_id
+            lead = self.lead_length(public_blockchain)
 
             if lead >= 2:
                 # private blockchain is more than 1 blocks longer than public blockchain
