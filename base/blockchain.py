@@ -69,7 +69,14 @@ class Blockchain(BlockchainBase):
 
     def override_chain(self, attacker):
         """Override last N blocks with private chain."""
-        self.chain[attacker.blockchain.fork_block_id - 1 :] = []
+
+        # handle edge case when the first mined block is by selfish miner
+        fork_id = attacker.blockchain.fork_block_id
+        if fork_id != 0:
+            index = fork_id - 1
+        else:
+            index = fork_id
+        self.chain[index:] = []
         self.chain.extend(attacker.blockchain.chain)
 
     def to_dict(self) -> Dict[str, Any]:
