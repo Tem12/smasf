@@ -67,6 +67,12 @@ class Mediator(MediatorBase):
                 self.public_blockchain.override_chain(winner)
                 winner.clear_private_chain()
 
+                # clear private chains of competing attackers
+                # and also remove them from action store
+                for attacker in match_objects:
+                    attacker.clear_private_chain()
+                    self.action_store.remove_object(SA.MATCH, attacker)
+
         elif len(match_objects) == 1:
             # just one attacker in match phase
             match_obj = match_objects[0]
@@ -101,6 +107,12 @@ class Mediator(MediatorBase):
         # override
         self.public_blockchain.override_chain(match_obj)
         match_obj.clear_private_chain()
+
+        # action_store is reset after every resolve_overrides -->
+        # no need to clean it. Here is cleaning just of private chains
+        # of SM competitors
+        for attacker in match_attackers:
+            attacker.clear_private_chain()
 
         if self.ongoing_fork:
             # override automatically solves all ongoing fork
@@ -151,6 +163,7 @@ class Mediator(MediatorBase):
                     f" {leader.miner_id} in fork"
                 )
                 self.public_blockchain.override_chain(leader)
+                # cleaning of competing SM is performed via ADOPT
                 leader.clear_private_chain()
 
             elif action == SA.WAIT:
@@ -186,7 +199,6 @@ class Mediator(MediatorBase):
 
     def run_simulation(self):
         """Main business logic for running selfish mining simulation."""
-
         for blocks_mined in range(self.config.simulation_mining_rounds):
             # competitors with match actions
             leader = self.choose_leader(self.miners, self.miners_info)
