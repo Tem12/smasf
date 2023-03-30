@@ -204,6 +204,14 @@ class Mediator(MediatorBase):
             leader = self.choose_leader(self.miners, self.miners_info)
             self.one_round(leader, blocks_mined)
 
+        # !!! handle extreme case !!!, when any of selfish miner
+        # has the longest chain after the end of simulation.
+        # This happens only if any of SM has higher mining power than HM
+        match_attackers = self.action_store.get_objects(SA.WAIT)
+        if len(match_attackers) > 0:
+            winner = random.choice(match_attackers)
+            self.public_blockchain.override_chain(winner)
+
     def run(self):
         self.log.info("Mediator in Nakamoto")
 
