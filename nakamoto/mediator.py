@@ -107,6 +107,9 @@ class Mediator(MediatorBase):
         # override
         self.public_blockchain.override_chain(match_obj)
         match_obj.clear_private_chain()
+        # It is necessary to increase last block id on honest chain after override
+        # which happens only if HM is catching SM and las 1 block shorter chain
+        self.public_blockchain.last_block_id += 1
 
         # action_store is reset after every resolve_overrides -->
         # no need to clean it. Here is cleaning just of private chains
