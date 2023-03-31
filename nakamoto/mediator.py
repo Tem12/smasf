@@ -50,6 +50,11 @@ class Mediator(MediatorBase):
             simulation_mining_rounds=sim_config["simulation_mining_rounds"],
         )
 
+    # pylint: disable=no-self-use
+    def resolve_matches_clear(self, winner):
+        """Clear all necessary blockchains in method `resolve_matches`."""
+        winner.clear_private_chain()
+
     def resolve_matches(self):
         self.log.info("resolve_matches")
         match_objects = self.action_store.get_objects(SA.MATCH)
@@ -65,7 +70,7 @@ class Mediator(MediatorBase):
             else:
                 # winner is one of attackers, so override last block on public blockchain
                 self.public_blockchain.override_chain(winner)
-                winner.clear_private_chain()
+                self.resolve_matches_clear(winner)
 
                 # clear private chains of competing attackers
                 # and also remove them from action store
@@ -93,6 +98,11 @@ class Mediator(MediatorBase):
             # there is no onging fork and multiple attackers with match
             self.ongoing_fork = True
 
+    # pylint: disable=no-self-use
+    def resolve_overrides_clear(self, match_obj):
+        """Clear all necessary blockchains in method `resolve_overrides`."""
+        match_obj.clear_private_chain()
+
     def resolve_overrides(self):
         self.log.info("resolve_overrides")
 
@@ -106,7 +116,7 @@ class Mediator(MediatorBase):
 
         # override
         self.public_blockchain.override_chain(match_obj)
-        match_obj.clear_private_chain()
+        self.resolve_overrides_clear(match_obj)
         # It is necessary to increase last block id on honest chain after override
         # which happens only if HM is catching SM and las 1 block shorter chain
         self.public_blockchain.last_block_id += 1
