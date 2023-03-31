@@ -66,11 +66,9 @@ class Mediator(NakamotoMediator):
 
     def add_honest_block(self, round_id, honest_miner, is_weak_block):
         self.public_blockchain.chain.extend(honest_miner.blockchain_weak.chain)
-        weak_blockchain_len = len(honest_miner.blockchain_weak.chain)
         honest_miner.clear_private_weak_chain()
-        self.public_blockchain.last_block_id += weak_blockchain_len
-
         super().add_honest_block(round_id, honest_miner, is_weak_block)
+
         self.public_blockchain.last_strong_block_id = len(self.public_blockchain.chain)
 
     def selfish_override(self, leader):
@@ -82,7 +80,7 @@ class Mediator(NakamotoMediator):
         )
         self.public_blockchain.override_chain(leader)
         # cleaning of competing SM is performed via ADOPT
-        leader.clear_private_chain()
+        leader.clear_private_strong_chain()
         # cleaning of competing SM is performed via ADOPT
         # clear just honest miner private weak chain
         self.honest_miner.clear_private_weak_chain()
