@@ -7,17 +7,17 @@ Date: 17.3.2023
 import random
 
 from base.blockchain import Blockchain
-from base.mediator_base import ActionObjectStore, MediatorBase
 from base.miner_base import HonestMinerAction as HA
 from base.miner_base import MinerType
 from base.miner_base import SelfishMinerAction as SA
 from base.sim_config_base import SimulationConfigBase as SimulationConfig
+from base.simulation_manager_base import ActionObjectStore, SimulationManagerBase
 from nakamoto.honest_miner import HonestMinerStrategy
 from nakamoto.my_graphs import plot_block_counts
 from nakamoto.selfish_miner import SelfishMinerStrategy
 
 
-class Mediator(MediatorBase):
+class SimulationManager(SimulationManagerBase):
     """Mediator class for Nakamoto consensus for running whole simulation."""
 
     def __init__(self, simulation_config: dict, blockchain: str):

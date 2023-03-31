@@ -82,8 +82,8 @@ class ActionObjectStore:
         self._all_actions.clear()
 
 
-class MediatorBase(ABC):
-    """Abstract base class for all blockchain mediators."""
+class SimulationManagerBase(ABC):
+    """Abstract base class for all blockchain simulation managers."""
 
     def __init__(self, simulation_config: Dict[str, Any], blockchain: str):
         self.log = create_logger(blockchain)

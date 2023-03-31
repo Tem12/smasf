@@ -5,10 +5,10 @@ Author: Jan Jakub Kubik (xkubik32)
 Date: 14.3.2023
 """
 
-from base.mediator_base import MediatorBase
+from base.simulation_manager_base import SimulationManagerBase
 
 
-class Mediator(MediatorBase):
+class SimulationManager(SimulationManagerBase):
     """Mediator class for Strongchain consensus for running whole simulation."""
 
     def run(self):

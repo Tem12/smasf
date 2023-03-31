@@ -15,13 +15,13 @@ def run_simulations(blockchain: str):
 
     :param blockchain: blockchain name for simulation
     """
-    mediator_module = importlib.import_module(blockchain + "." + "mediator")
+    mediator_module = importlib.import_module(blockchain + "." + "simulation_manager")
     simulations_config = load_simulations_config(blockchain + "/" + "config.yaml")
     for simulation_config in simulations_config:
-        mediator = mediator_module.Mediator(
+        sim_manager = mediator_module.SimulationManager(
             simulation_config=simulation_config, blockchain=blockchain
         )
-        mediator.run()
+        sim_manager.run()
 
 
 def main():
