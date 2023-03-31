@@ -13,10 +13,10 @@ from base.sim_config_base import SimulationConfigBase
 class SimulationConfig(SimulationConfigBase):
     """Dataclass for Subchain simulation config.
 
-    All default attributes for simulation are defined in `SimulationConfigBase` class
+    All default attributes for simulation are defined in `SimulationConfigBase` class.
 
-        Attributes:
-            weak_to_strong_block_ratio (int): ratio of weak to strong blocks.
+    Attributes:
+        weak_to_strong_block_ratio (int): The ratio of weak to strong blocks.
     """
 
     weak_to_strong_block_ratio: int
@@ -26,6 +26,4 @@ class SimulationConfig(SimulationConfigBase):
         super().__post_init__()
 
         if self.weak_to_strong_block_ratio < 1:
-            raise ValueError(
-                "Weak to strong block ration must be at least 1 or higher."
-            )
+            raise ValueError("Weak to strong block ratio must be at least 1 or higher.")

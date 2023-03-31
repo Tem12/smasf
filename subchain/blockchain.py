@@ -15,22 +15,26 @@ class Blockchain(NakamotoBlockchain):
 
     last_strong_block_id: Optional[int] = 0
 
-    def override_chain(self, attacker):
-        """Override last N blocks with private chain."""
+    def override_chain(self, attacker) -> None:
+        """Override last N blocks with private chain from the attacker's blockchain.
 
+        Args:
+            attacker: An instance of the attacker with a private blockchain.
+        """
         # Subchain has different indexing to Nakamoto
         self.chain[attacker.blockchain.fork_block_id :] = []
         self.chain.extend(attacker.blockchain.chain)
 
         self.last_strong_block_id = len(self.chain)
 
-    def size_from_index(self, index):
-        """Get length of strong blocks in the blockchain from specified index.
+    def size_from_index(self, index: int) -> int:
+        """Get length of strong blocks in the blockchain from the specified index.
 
         Args:
-            index (int): The index where to start counting of strong blocks
+            index (int): The index where to start counting of strong blocks.
+
         Returns:
-            int: Length of the blockchain.
+            int: Length of the blockchain from the specified index.
         """
         size = 0
         for block in self.chain[index:]:
@@ -40,7 +44,7 @@ class Blockchain(NakamotoBlockchain):
 
         return size
 
-    def size(self):
+    def size(self) -> int:
         """Get length of strong blocks in the blockchain.
 
         Returns:
@@ -54,7 +58,7 @@ class Blockchain(NakamotoBlockchain):
 
         return size
 
-    def length(self):
+    def length(self) -> int:
         """Get length of private chain.
 
         Returns:
