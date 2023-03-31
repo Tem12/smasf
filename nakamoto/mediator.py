@@ -130,6 +130,17 @@ class Mediator(MediatorBase):
             is_weak=is_weak_block,
         )
 
+    def selfish_override(self, leader):
+        """override public blockchain by attacker's private blockchain."""
+        self.ongoing_fork = False
+        self.log.info(
+            f"Override by attacker {leader.blockchain.fork_block_id},"
+            f" {leader.miner_id} in fork"
+        )
+        self.public_blockchain.override_chain(leader)
+        # cleaning of competing SM is performed via ADOPT
+        leader.clear_private_chain()
+
     def one_round(self, leader, round_id, is_weak_block=False):
         """One round of simulation, where is one new block mined."""
         res = leader.mine_new_block(
@@ -160,14 +171,7 @@ class Mediator(MediatorBase):
             # ---------------------
             if action == SA.OVERRIDE:
                 # override public blockchain by attacker's private blockchain
-                self.ongoing_fork = False
-                self.log.info(
-                    f"Override by attacker {leader.blockchain.fork_block_id},"
-                    f" {leader.miner_id} in fork"
-                )
-                self.public_blockchain.override_chain(leader)
-                # cleaning of competing SM is performed via ADOPT
-                leader.clear_private_chain()
+                self.selfish_override(leader)
 
             elif action == SA.WAIT:
                 # wait ends round if there is no ongoing fork
