@@ -4,6 +4,8 @@ selfish miner for Nakamoto consensus protocol.
 Author: Jan Jakub Kubik (xkubik32)
 Date: 15.3.2023
 """
+from typing import Optional, Set
+
 from base.blockchain import Blockchain
 from base.miner_base import SelfishMinerAction as SA
 from base.miner_base import SelfishMinerStrategyBase
@@ -22,8 +24,8 @@ class SelfishMinerStrategy(SelfishMinerStrategyBase):
                 'Subclass must initialize the "private_blockchain" variable.'
             )
 
-    def clear_private_chain(self):
-        """Clear private chain after it overrides of main chain."""
+    def clear_private_chain(self) -> None:
+        """Clear private chain after it overrides the main chain."""
         self.blockchain.chain = []
         self.blockchain.fork_block_id = None
 
@@ -33,18 +35,17 @@ class SelfishMinerStrategy(SelfishMinerStrategyBase):
         mining_round: int,
         public_blockchain: "Blockchain",
         ongoing_fork: bool,
-        match_competitors=None,
-        gamma=None,
+        match_competitors: Optional[Set[int]] = None,
+        gamma: Optional[float] = None,
     ) -> None:
         """Mine a new block as a selfish miner for the Nakamoto consensus.
 
         Args:
             mining_round (int): The current mining round.
-            public_blockchain ('Blockchain'): The public blockchain.
+            public_blockchain (Blockchain): The public blockchain.
             ongoing_fork (bool): Indicates if there is an ongoing fork.
             match_competitors (set, optional): A set of competing selfish miners.
             gamma (float, optional): The gamma value for the simulation.
-
         """
         self.log.info(
             f"Selfish miner: {self.miner_id} is leader of round: {mining_round}"
@@ -84,15 +85,22 @@ class SelfishMinerStrategy(SelfishMinerStrategyBase):
             # no ongoing fork I currently mined new block
             self.action = SA.WAIT
 
-    def lead_length(self, public_blockchain):
-        """Method for computing leading of selfish miner in comparison to honest miner."""
+    def lead_length(self, public_blockchain: "Blockchain") -> int:
+        """Method for computing leading of selfish miner in comparison to honest miner.
+
+        Args:
+            public_blockchain (Blockchain): The public blockchain.
+
+        Returns:
+            int: The lead length of the selfish miner.
+        """
         return self.blockchain.length() - public_blockchain.last_block_id
 
     def decide_next_action(self, public_blockchain: "Blockchain", leader: int) -> SA:
         """Decide the next action for the selfish miner.
 
         Args:
-            public_blockchain ('Blockchain'): The public blockchain.
+            public_blockchain (Blockchain): The public blockchain.
             leader (int): The ID of the leader miner.
 
         Returns:
@@ -127,11 +135,11 @@ class SelfishMinerStrategy(SelfishMinerStrategyBase):
 
     def update_private_blockchain(
         self, public_blockchain: "Blockchain", mining_round: int
-    ):
+    ) -> None:
         """Update the private blockchain of the selfish miner.
 
         Args:
-            public_blockchain ('Blockchain'): The public blockchain.
+            public_blockchain (Blockchain): The public blockchain.
             mining_round (int): The current mining round.
         """
         if self.blockchain.size() == 0:

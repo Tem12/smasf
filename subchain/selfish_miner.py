@@ -16,33 +16,33 @@ class SelfishMinerStrategy(NakamotoSelfishMinerStrategy):
         self.blockchain = Blockchain(owner=self.miner_id)
         self.blockchain_weak = Blockchain(owner=self.miner_id)
 
-    def clear_private_weak_chain(self):
+    def clear_private_weak_chain(self) -> None:
         """Clear private chain of weak blocks."""
         self.blockchain_weak.chain = []
 
-    def clear_private_strong_chain(self):
+    def clear_private_strong_chain(self) -> None:
         """Clear private chain of strong blocks."""
         self.blockchain.chain = []
         self.blockchain.fork_block_id = None
 
-    def clear_private_chain(self):
+    def clear_private_chain(self) -> None:
         """Clear private chains of weak and also strong blocks."""
         self.clear_private_strong_chain()
         self.clear_private_weak_chain()
 
-    def lead_length(self, public_blockchain):
+    def lead_length(self, public_blockchain: Blockchain) -> int:
         """Method for computing leading of selfish miner in comparison to honest miner."""
         fork_block_id = self.blockchain.fork_block_id
         pub_size = public_blockchain.size_from_index(fork_block_id)
         return self.blockchain.size() - pub_size
 
     def update_private_blockchain(
-        self, public_blockchain: "Blockchain", mining_round: int
-    ):
+        self, public_blockchain: Blockchain, mining_round: int
+    ) -> None:
         """Update the private strong blockchain of the selfish miner.
 
         Args:
-            public_blockchain ('Blockchain'): The public blockchain.
+            public_blockchain (Blockchain): The public blockchain.
             mining_round (int): The current mining round.
         """
         # at the beginning add blockchain of weak blocks and clear it

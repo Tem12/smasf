@@ -15,6 +15,7 @@ class HonestMinerStrategy(NakamotoHonestMinerStrategy):
         super().__init__(mining_power)
         self.blockchain_weak = Blockchain(owner="public blockchain weak")
 
-    def clear_private_weak_chain(self):
+    def clear_private_weak_chain(self) -> None:
+        """Clear the private weak chain by resetting its list of blocks."""
         # public chain of weak blocks
         self.blockchain_weak.chain = []

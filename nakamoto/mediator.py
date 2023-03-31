@@ -35,8 +35,15 @@ class Mediator(MediatorBase):
         self.action_store = ActionObjectStore()
         self.ongoing_fork = False
 
-    def parse_config(self, simulation_config):
-        """Parsing dict from yaml config."""
+    def parse_config(self, simulation_config: dict) -> SimulationConfig:
+        """Parsing dict from yaml config.
+
+        Args:
+            simulation_config (dict): A dictionary containing the simulation configuration.
+
+        Returns:
+            SimulationConfig: An instance of SimulationConfig with the parsed configuration values.
+        """
         self.log.info("Nakamoto parse config method")
 
         sim_config = self.general_config_validations(simulation_config)
@@ -51,11 +58,16 @@ class Mediator(MediatorBase):
         )
 
     # pylint: disable=no-self-use
-    def resolve_matches_clear(self, winner):
-        """Clear all necessary blockchains in method `resolve_matches`."""
+    def resolve_matches_clear(self, winner: SelfishMinerStrategy) -> None:
+        """Clear all necessary blockchains in method `resolve_matches`.
+
+        Args:
+            winner (SelfishMinerStrategy): The winning selfish miner.
+        """
         winner.clear_private_chain()
 
-    def resolve_matches(self):
+    def resolve_matches(self) -> None:
+        """Resolve matches between honest miner and selfish miners."""
         self.log.info("resolve_matches")
         match_objects = self.action_store.get_objects(SA.MATCH)
 
@@ -71,7 +83,6 @@ class Mediator(MediatorBase):
                 # winner is one of attackers, so override last block on public blockchain
                 self.public_blockchain.override_chain(winner)
                 self.resolve_matches_clear(winner)
-
                 # clear private chains of competing attackers
                 # and also remove them from action store
                 for attacker in match_objects:
@@ -91,19 +102,24 @@ class Mediator(MediatorBase):
             else:
                 # gamma is 0 or 0.5. If 0 give attacker 1 round chance to mine new block
                 # If 0.5 give chance attacker to mine new block and also group of honest
-                # miners, which could possibly winn the next round
+                # miners, which could possibly win the next round
                 self.ongoing_fork = True
 
         else:
-            # there is no onging fork and multiple attackers with match
+            # there is no ongoing fork and multiple attackers with match
             self.ongoing_fork = True
 
     # pylint: disable=no-self-use
-    def resolve_overrides_clear(self, match_obj):
-        """Clear all necessary blockchains in method `resolve_overrides`."""
+    def resolve_overrides_clear(self, match_obj: SelfishMinerStrategy) -> None:
+        """Clear all necessary blockchains in method `resolve_overrides`.
+
+        Args:
+            match_obj (SelfishMinerStrategy): The selfish miner with the longest chain.
+        """
         match_obj.clear_private_chain()
 
-    def resolve_overrides(self):
+    def resolve_overrides(self) -> None:
+        """Resolve any overrides that need to occur after mining."""
         self.log.info("resolve_overrides")
 
         match_attackers = self.action_store.get_objects(SA.OVERRIDE)
@@ -118,7 +134,7 @@ class Mediator(MediatorBase):
         self.public_blockchain.override_chain(match_obj)
         self.resolve_overrides_clear(match_obj)
         # It is necessary to increase last block id on honest chain after override
-        # which happens only if HM is catching SM and las 1 block shorter chain
+        # which happens only if HM is catching SM and has 1 block shorter chain
         self.public_blockchain.last_block_id += 1
 
         # action_store is reset after every resolve_overrides -->
@@ -131,8 +147,16 @@ class Mediator(MediatorBase):
             # override automatically solves all ongoing fork
             self.ongoing_fork = False
 
-    def add_honest_block(self, round_id, honest_miner, is_weak_block):
-        """Add honest block to public blockchain"""
+    def add_honest_block(
+        self, round_id: int, honest_miner: HonestMinerStrategy, is_weak_block: bool
+    ) -> None:
+        """Add honest block to public blockchain.
+
+        Args:
+            round_id (int): The current round ID.
+            honest_miner (HonestMinerStrategy): The honest miner who mined the block.
+            is_weak_block (bool): Indicates if the block is a weak block or not.
+        """
         self.public_blockchain.add_block(
             data=f"Block {round_id} data",
             miner=f"Honest miner {honest_miner.miner_id}",
@@ -140,8 +164,12 @@ class Mediator(MediatorBase):
             is_weak=is_weak_block,
         )
 
-    def selfish_override(self, leader):
-        """override public blockchain by attacker's private blockchain."""
+    def selfish_override(self, leader: SelfishMinerStrategy) -> None:
+        """Override public blockchain with attacker's private blockchain.
+
+        Args:
+            leader (SelfishMinerStrategy): The selfish miner with the longest chain.
+        """
         self.ongoing_fork = False
         self.log.info(
             f"Override by attacker {leader.blockchain.fork_block_id},"
@@ -230,6 +258,7 @@ class Mediator(MediatorBase):
             self.public_blockchain.override_chain(winner)
 
     def run(self):
+        """Run the simulation, process the results and plot the block counts."""
         self.log.info("Mediator in Nakamoto")
 
         self.run_simulation()
