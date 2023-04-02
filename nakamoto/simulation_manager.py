@@ -118,6 +118,11 @@ class SimulationManager(SimulationManagerBase):
         """
         match_obj.clear_private_chain()
 
+    def resolve_overrides_select_from_multiple_attackers(self, attackers):
+        """Customizable method for selecting of override attacker winner if there
+        is more than one attacker with override."""
+        return random.choice(attackers)
+
     def resolve_overrides(self) -> None:
         """Resolve any overrides that need to occur after mining."""
         self.log.info("resolve_overrides")
@@ -128,7 +133,9 @@ class SimulationManager(SimulationManagerBase):
             match_obj = match_attackers[0]
         else:
             # multiple attacker
-            match_obj = random.choice(match_attackers)
+            match_obj = self.resolve_overrides_select_from_multiple_attackers(
+                match_attackers
+            )
 
         # override
         self.public_blockchain.override_chain(match_obj)
