@@ -62,6 +62,9 @@ class SimulationManager(NakamotoSimulationManager):
     def resolve_matches_clear(self, winner):
         print("Resolve matches clear strongchain")
 
+    def resolve_overrides(self) -> None:
+        print("Resolve overrides strongchain")
+
     def resolve_matches(self) -> None:
         print("Resolve matches strongchain")
 
