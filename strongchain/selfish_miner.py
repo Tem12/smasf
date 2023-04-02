@@ -66,7 +66,6 @@ class SelfishMinerStrategy(NakamotoSelfishMinerStrategy):
             # print(f"Selfish chains pow is: {sm_chain_pow}")
             # print(json.dumps(public_blockchain.to_dict()))
             # print(f"Pubic chains pow is: {public_blockchain.chains_pow()}")
-            # print('Kurvo som tu')
             # print(sm_chain_pow)
             # print(hm_chain_pow)
             # exit()

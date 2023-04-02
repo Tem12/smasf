@@ -59,11 +59,20 @@ class SimulationManager(NakamotoSimulationManager):
             weak_to_strong_header_ratio=sim_config["weak_to_strong_header_ratio"],
         )
 
+    def resolve_matches_clear(self, winner):
+        print("Resolve matches clear strongchain")
+
     def resolve_overrides(self) -> None:
         print("Resolve overrides strongchain")
 
     def resolve_matches(self) -> None:
         print("Resolve matches strongchain")
+
+    def resolve_overrides_clear(self, match_obj):
+        print("Resolve matches clear strongchain")
+
+    def resolve_overrides(self) -> None:
+        print("Resolve overrides strongchain")
 
     def selfish_override(self, leader: SelfishMinerStrategy) -> None:
         """Override public blockchain with attacker's private blockchain.
