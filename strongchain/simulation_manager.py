@@ -61,26 +61,45 @@ class SimulationManager(NakamotoSimulationManager):
 
     def resolve_matches_clear(self, winner):
         print("Resolve matches clear strongchain")
-
-    def resolve_overrides(self) -> None:
-        print("Resolve overrides strongchain")
+        winner.clear_private_strong_chain()
+        # clear private weak chain of selfish miner
+        self.honest_miner.clear_private_weak_chain()
+        # clearing of competitors is performed inside resolve_matches
 
     def resolve_matches(self) -> None:
         print("Resolve matches strongchain")
 
+    def resolve_overrides_select_from_multiple_attackers(self, attackers):
+        print(f"attackers: {attackers}")
+        print("resolve_overrides_select_from_multiple_attackers in strongchain")
+        exit()
+
     def resolve_overrides_clear(self, match_obj):
         print("Resolve matches clear strongchain")
+        match_obj.clear_private_strong_chain()
+        # need to clear weak blockchain of honest miner
+        self.honest_miner.clear_private_weak_chain()
+        # clearing of competitors is performed inside resolve_overrides
 
-    def resolve_overrides(self) -> None:
-        print("Resolve overrides strongchain")
+    # def resolve_overrides(self) -> None:
+    #     print("Resolve overrides strongchain")
 
     def selfish_override(self, leader: SelfishMinerStrategy) -> None:
-        """Override public blockchain with attacker's private blockchain.
+        # override public blockchain by attacker's private blockchain
+        # TODO: mozem zavolat parenta asi a nechat len posledny riadok
 
-        Args:
-            leader (SelfishMinerStrategy): The selfish miner with the longest chain.
-        """
         print("Selfish override after mine new block by him in strongchain")
+        self.ongoing_fork = False
+        self.log.info(
+            f"Override by attacker {leader.blockchain.fork_block_id},"
+            f" {leader.miner_id} in fork"
+        )
+        self.public_blockchain.override_chain(leader)
+        # cleaning of competing SM is performed via ADOPT
+        leader.clear_private_strong_chain()
+        # cleaning of competing SM is performed via ADOPT
+        # clear just honest miner private weak chain
+        self.honest_miner.clear_private_weak_chain()
 
     def add_honest_block(self, round_id, honest_miner, is_weak_block):
         # add new honest block
