@@ -16,16 +16,16 @@ class SimulationConfig(SimulationConfigBase):
     All default attributes for simulation are defined in `SimulationConfigBase` class.
 
     Attributes:
-        weak_to_strong_headers_ratio (int): The ratio of weak to strong blocks.
+        weak_to_strong_header_ratio (int): The ratio of weak to strong blocks.
     """
 
-    weak_to_strong_headers_ratio: int
+    weak_to_strong_header_ratio: int
 
     def __post_init__(self) -> None:
         """Perform additional data validation after initialization."""
         super().__post_init__()
 
-        if self.weak_to_strong_headers_ratio < 1:
+        if self.weak_to_strong_header_ratio < 1:
             raise ValueError(
                 "Weak to strong headers ratio must be at least 1 or higher."
             )
