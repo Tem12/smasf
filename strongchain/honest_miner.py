@@ -20,5 +20,6 @@ class HonestMinerStrategy(NakamotoHonestMinerStrategy):
         new_block = WeakHeader(data, miner, miner_id)
         self.weak_headers.append(new_block)
 
-    def clear_private_chain(self):
-        """Clear public weak headers."""
+    def clear_private_weak_chain(self):
+        """Clear private weak headers."""
+        self.weak_headers = []

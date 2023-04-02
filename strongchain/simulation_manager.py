@@ -4,7 +4,7 @@ whole simulation of selfish mining for Strongchain consensus.
 Author: Jan Jakub Kubik (xkubik32)
 Date: 14.3.2023
 """
-import json
+# import json
 import random
 
 from base.miner_base import MinerType
@@ -26,7 +26,9 @@ class SimulationManager(NakamotoSimulationManager):
         # Instantiate everything necessary for Strongchain
         self.honest_miner = HonestMinerStrategy(mining_power=self.config.honest_miner)
         self.selfish_miners = [
-            SelfishMinerStrategy(mining_power=sm_power)
+            SelfishMinerStrategy(
+                mining_power=sm_power, ratio=self.config.weak_to_strong_header_ratio
+            )
             for sm_power in self.config.selfish_miners
         ]
         self.miners = [self.honest_miner] + self.selfish_miners
@@ -34,7 +36,10 @@ class SimulationManager(NakamotoSimulationManager):
             sm.mining_power for sm in self.selfish_miners
         ]
 
-        self.public_blockchain = Blockchain(owner="public blockchain")
+        self.public_blockchain = Blockchain(
+            owner="public blockchain",
+            weak_to_strong_header_ratio=self.config.weak_to_strong_header_ratio,
+        )
 
     def parse_config(self, simulation_config):
         """Parsing dict from yaml config."""
@@ -53,6 +58,35 @@ class SimulationManager(NakamotoSimulationManager):
             simulation_mining_rounds=sim_config["simulation_mining_rounds"],
             weak_to_strong_header_ratio=sim_config["weak_to_strong_header_ratio"],
         )
+
+    def resolve_overrides(self) -> None:
+        print("Resolve overrides strongchain")
+
+    def resolve_matches(self) -> None:
+        print("Resolve matches strongchain")
+
+    def selfish_override(self, leader: SelfishMinerStrategy) -> None:
+        """Override public blockchain with attacker's private blockchain.
+
+        Args:
+            leader (SelfishMinerStrategy): The selfish miner with the longest chain.
+        """
+        print("Selfish override after mine new block by him in strongchain")
+
+    def add_honest_block(self, round_id, honest_miner, is_weak_block):
+        # add new honest block
+        self.public_blockchain.add_block(
+            data=f"Block {round_id} data",
+            miner=f"Honest miner {honest_miner.miner_id}",
+            miner_id=honest_miner.miner_id,
+            is_weak=is_weak_block,
+        )
+
+        # add weak headers to currently mined last block
+        self.public_blockchain.chain[-1].setup_weak_headers(
+            self.honest_miner.weak_headers
+        )
+        self.honest_miner.clear_private_weak_chain()
 
     def run_simulation(self):
         """Main business logic for running selfish mining simulation."""
@@ -80,15 +114,14 @@ class SimulationManager(NakamotoSimulationManager):
                     miner_id=leader.miner_id,
                 )
                 weak_headers += 1
-                # pass
                 print(leader.weak_headers)
-                print(json.dumps([x.to_dict() for x in leader.weak_headers]))
+                # print(json.dumps([x.to_dict() for x in leader.weak_headers]))
 
             else:
                 print(
                     f"Strong header generated in round {blocks_mined} by {leader.miner_type}"
                 )
-                # self.one_round(leader, blocks_mined, is_weak_block=False)
+                self.one_round(leader, blocks_mined, is_weak_block=False)
                 strong_headers += 1
 
         print(f"number of weak blocks: {weak_headers}")
