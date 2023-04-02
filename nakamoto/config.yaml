@@ -11,8 +11,12 @@
     simulation_mining_rounds: 200_000
 
 #- simulation2:
-#    example1: Nakamoto_2
-#    example_list:
-#      - item2_1
-#      - item2_2
-#      - item3_3
+#    consensus_name: Nakamoto
+#    miners:
+#      honest:
+#        mining_power: 56
+#      selfish:
+#        - mining_power: 22
+#        - mining_power: 22
+#    gamma: 0.5
+#    simulation_mining_rounds: 200_000
