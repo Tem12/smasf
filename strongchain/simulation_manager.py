@@ -4,7 +4,6 @@ whole simulation of selfish mining for Strongchain consensus.
 Author: Jan Jakub Kubik (xkubik32)
 Date: 14.3.2023
 """
-# import json
 import random
 
 from base.miner_base import MinerType
@@ -70,9 +69,19 @@ class SimulationManager(NakamotoSimulationManager):
         print("Resolve matches strongchain")
 
     def resolve_overrides_select_from_multiple_attackers(self, attackers):
-        print(f"attackers: {attackers}")
-        print("resolve_overrides_select_from_multiple_attackers in strongchain")
-        exit()
+        attacker_and_pow = []
+        for attacker in attackers:
+            chain_strength = attacker.blockchain.chains_pow()
+            attacker_and_pow.append((attacker, chain_strength))
+
+        # Find the maximum value
+        max_value = max(obj[1] for obj in attacker_and_pow)
+        # Filter the attackers with the highest value
+        matching_attackers = [obj for obj in attacker_and_pow if obj[1] == max_value]
+        # Select a random object among the ones with the highest value
+        winner = random.choice(matching_attackers)
+
+        return winner[0]
 
     def resolve_overrides_clear(self, match_obj):
         print("Resolve matches clear strongchain")
@@ -82,11 +91,11 @@ class SimulationManager(NakamotoSimulationManager):
         # clearing of competitors is performed inside resolve_overrides
 
     # def resolve_overrides(self) -> None:
+    # Not necessary -
     #     print("Resolve overrides strongchain")
 
     def selfish_override(self, leader: SelfishMinerStrategy) -> None:
         # override public blockchain by attacker's private blockchain
-        # TODO: mozem zavolat parenta asi a nechat len posledny riadok
 
         print("Selfish override after mine new block by him in strongchain")
         self.ongoing_fork = False
@@ -116,6 +125,12 @@ class SimulationManager(NakamotoSimulationManager):
         )
         self.honest_miner.clear_private_weak_chain()
 
+    def clear_sm_weak_headers_if_no_fork(self):
+        """Clear weak blocks of selfish miners without fork."""
+        for selfish_miner in self.selfish_miners:
+            if not selfish_miner.blockchain.fork_block_id:
+                selfish_miner.clear_private_weak_headers()
+
     def run_simulation(self):
         """Main business logic for running selfish mining simulation."""
         total_headers = self.config.weak_to_strong_header_ratio + 1
@@ -142,13 +157,19 @@ class SimulationManager(NakamotoSimulationManager):
                     miner_id=leader.miner_id,
                 )
                 weak_headers += 1
-                print(leader.weak_headers)
+                # print(leader.weak_headers)
                 # print(json.dumps([x.to_dict() for x in leader.weak_headers]))
 
             else:
                 print(
                     f"Strong header generated in round {blocks_mined} by {leader.miner_type}"
                 )
+
+                # # this fulfill the condition, that weak header points to the
+                # previously mined strong block in main chain
+                # if leader.miner_type == MinerType.HONEST:
+                #     self.clear_sm_weak_headers_if_no_fork()
+
                 self.one_round(leader, blocks_mined, is_weak_block=False)
                 strong_headers += 1
 

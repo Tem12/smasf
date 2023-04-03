@@ -91,3 +91,11 @@ class Blockchain(NakamotoBlockchain):
                 chains_pow = chains_pow + (1 / self.weak_to_strong_header_ratio)
 
         return chains_pow
+
+    def override_chain(self, attacker) -> None:
+        """Override last N blocks with private chain."""
+
+        # handle edge case when the first mined block is by selfish miner
+        # seems to be working
+        self.chain[attacker.blockchain.fork_block_id :] = []
+        self.chain.extend(attacker.blockchain.chain)
