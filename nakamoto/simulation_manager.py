@@ -72,7 +72,7 @@ class SimulationManager(SimulationManagerBase):
         match_objects = self.action_store.get_objects(SA.MATCH)
 
         if self.ongoing_fork:
-            self.ongoing_fork = True
+            self.ongoing_fork = False
 
             # random choice of winner
             winner = random.choice(match_objects + [self.honest_miner])
