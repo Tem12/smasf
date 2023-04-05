@@ -4,22 +4,32 @@ Author: Jan Jakub Kubik (xkubik32)
 Date: 14.3.2023
 """
 import importlib
+from argparse import Namespace
 
 from base.logs import create_logger
 from sm_utils import load_simulations_config, parse_args
 
 
-def run_simulations(blockchain: str):
+def run_simulations(parsed_args: Namespace) -> None:
     """Run selfish mining simulations.
     Run selfish mining simulations according to yaml config for selected consensus protocol.
 
-    :param blockchain: blockchain name for simulation
+    :param parsed_args: valid parsed program arguments
     """
-    mediator_module = importlib.import_module(blockchain + "." + "simulation_manager")
-    simulations_config = load_simulations_config(blockchain + "/" + "config.yaml")
+    print(parsed_args)
+    print(type(parsed_args))
+
+    if parsed_args.blockchain == "subchain":
+        module_path = parsed_args.blockchain + "." + parsed_args.option
+        config_path = parsed_args.blockchain + "/" + parsed_args.option
+    else:
+        module_path = config_path = parsed_args.blockchain
+
+    mediator_module = importlib.import_module(module_path + "." + "simulation_manager")
+    simulations_config = load_simulations_config(config_path + "/" + "config.yaml")
     for simulation_config in simulations_config:
         sim_manager = mediator_module.SimulationManager(
-            simulation_config=simulation_config, blockchain=blockchain
+            simulation_config=simulation_config, blockchain=parsed_args
         )
         sim_manager.run()
 
@@ -27,7 +37,7 @@ def run_simulations(blockchain: str):
 def main():
     """Main function of whole program."""
     args = parse_args()
-    run_simulations(args.blockchain)
+    run_simulations(args)
     log = create_logger("main")
     log.info("logging")
     print(log)
