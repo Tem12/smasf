@@ -3,22 +3,33 @@
 Author: Jan Jakub Kubik (xkubik32)
 Date: 13.3.2023
 """
-import argparse
+from argparse import ArgumentParser
 
 import yaml
 
 
 def parse_args():
     """Parse all program arguments."""
-    parser = argparse.ArgumentParser(
+    parser = ArgumentParser(
         description="Simulate selfish mining on different blockchains."
     )
-    parser.add_argument(
-        "blockchain",
-        choices=["nakamoto", "subchain", "strongchain"],
+
+    subparsers = parser.add_subparsers(dest="blockchain", help="sub-command help")
+
+    # Create the parser for the first choice
+    subchain = subparsers.add_parser("subchain", help="Subchain blockchain simulation")
+    subchain.add_argument(
+        "option",
+        choices=["weak", "strong"],
         type=str.lower,
-        help="Select blockchain network where you want to simulate selfish mining",
+        help="Selfish mining simulation for Subchain on WEAK or STRONG headers",
     )
+
+    # Create the parser for the second choice
+    subparsers.add_parser("nakamoto", help="Nakamoto blockchain simulation")
+
+    # Create the parser for the third choice
+    subparsers.add_parser("strongchain", help="Strongchain blockchain simulation")
 
     return parser.parse_args()
 
