@@ -5,7 +5,7 @@ Author: Jan Jakub Kubik (xkubik32)
 Date: 23.3.2023
 """
 from nakamoto.honest_miner import HonestMinerStrategy as NakamotoHonestMinerStrategy
-from subchain.blockchain import Blockchain
+from subchain.strong.blockchain import Blockchain
 
 
 class HonestMinerStrategy(NakamotoHonestMinerStrategy):
