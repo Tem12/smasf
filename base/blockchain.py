@@ -76,9 +76,6 @@ class Blockchain(BlockchainBase):
         new_block = Block(data, miner, miner_id, is_weak)
         self.chain.append(new_block)
         self.last_block_id += 1
-        # print('************' * 5)
-        # print(self.chain)
-        # print(f'increment last_block_id: {self.last_block_id}, for: {self.owner}')
 
     def print_chain(self) -> None:
         """Print the blockchain."""
