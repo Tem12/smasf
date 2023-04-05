@@ -14,9 +14,9 @@ from base.miner_base import MinerType
 from base.miner_base import SelfishMinerAction as SA
 from nakamoto.mediator import Mediator as NakamotoMediator
 from nakamoto.my_graphs import plot_block_counts
-from subchain.honest_miner import HonestMinerStrategy
-from subchain.selfish_miner import SelfishMinerStrategy
-from subchain.sim_config import SimulationConfig
+from subchain.weak.honest_miner import HonestMinerStrategy
+from subchain.weak.selfish_miner import SelfishMinerStrategy
+from subchain.weak.sim_config import SimulationConfig
 
 
 class Mediator(NakamotoMediator):
