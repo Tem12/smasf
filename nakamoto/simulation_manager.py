@@ -266,10 +266,16 @@ class SimulationManager(SimulationManagerBase):
 
     def run_simulation(self):
         """Main business logic for running selfish mining simulation."""
+        winns = {42: 0, 43: 0, 44: 0, 45: 0, 46: 0, 47: 0, 48: 0, 49: 0}
+
         for blocks_mined in range(self.config.simulation_mining_rounds):
             # competitors with match actions
             leader = self.choose_leader(self.miners, self.miners_info)
+            winns[leader.miner_id] += 1
             self.one_round(leader, blocks_mined)
+
+        self.log.info(self.config.simulation_mining_rounds)
+        self.log.info(winns)
 
         # !!! handle extreme case !!!, when any of selfish miner
         # has the longest chain after the end of simulation.
@@ -295,14 +301,16 @@ class SimulationManager(SimulationManagerBase):
             # "Selfish miner 48": 0,
             # "Selfish miner 49": 0,
         }
-        self.log.info(block_counts)
+        # self.log.info(block_counts)
 
-        self.log.info(block_counts)
+        # self.log.info(block_counts)
         for block in self.public_blockchain.chain:
-            self.log.info(block)
+            # self.log.info(block)
             block_counts[block.miner] += 1
 
-        self.log.info(block_counts)
-        self.log.info(self.selfish_miners[0].blockchain.chain)
+        # import json
+        # print(json.dumps(self.public_blockchain.to_dict()))
+        # self.log.info(block_counts)
+        # self.log.info(self.selfish_miners[0].blockchain.chain)
 
         plot_block_counts(block_counts, self.miners_info)
