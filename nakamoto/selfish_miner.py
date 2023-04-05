@@ -54,32 +54,29 @@ class SelfishMinerStrategy(SelfishMinerStrategyBase):
 
         if ongoing_fork:
             first_competitor = list(match_competitors)[0]
-            if (
-                len(match_competitors) == 1
-                and self.miner_id == first_competitor.miner_id
-            ):
-                # only 1 competitor and that's me and I currently mined new block
+
+            lead = self.blockchain.size() - first_competitor.blockchain.size()
+
+            # is this attacker id among competing attackers
+            if self.miner_id in [
+                competitor.miner_id for competitor in match_competitors
+            ]:
+                # He mined a new block and is currently the longest
                 self.action = SA.OVERRIDE
 
+            elif lead >= 2:
+                # He has the longest chain and don't care what other does
+                self.action = SA.WAIT
+
+            elif lead == 0:
+                # competitors have the same length as me but I started after ongoing competition
+                # (it means later fork)
+                self.action = SA.MATCH
+
             else:
-                # there is more competitors or the only one and it is not me
-                lead = self.blockchain.size() - first_competitor.blockchain.size()
-                if lead >= 2:
-                    # I have the longest chain and don't care what other does
-                    self.action = SA.WAIT
-
-                elif lead == 1:
-                    # I have the longest chain but just by 1 block
-                    self.action = SA.OVERRIDE
-
-                elif lead == 0:
-                    # competitors have the same length as me
-                    self.action = SA.MATCH
-
-                else:
-                    # competitors have longer chain than me
-                    self.clear_private_chain()
-                    self.action = SA.ADOPT
+                # competitors have longer chain than me
+                self.clear_private_chain()
+                self.action = SA.ADOPT
 
         else:
             # no ongoing fork I currently mined new block
