@@ -10,10 +10,10 @@ import random
 from base.miner_base import MinerType
 from nakamoto.my_graphs import plot_block_counts
 from nakamoto.simulation_manager import SimulationManager as NakamotoSimulationManager
+from subchain.sim_config import SimulationConfig
 from subchain.strong.blockchain import Blockchain
 from subchain.strong.honest_miner import HonestMinerStrategy
 from subchain.strong.selfish_miner import SelfishMinerStrategy
-from subchain.strong.sim_config import SimulationConfig
 
 
 class SimulationManager(NakamotoSimulationManager):
