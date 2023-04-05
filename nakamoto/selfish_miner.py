@@ -63,7 +63,7 @@ class SelfishMinerStrategy(SelfishMinerStrategyBase):
 
             else:
                 # there is more competitors or the only one and it is not me
-                lead = self.blockchain.size() > first_competitor.blockchain.size()
+                lead = self.blockchain.size() - first_competitor.blockchain.size()
                 if lead >= 2:
                     # I have the longest chain and don't care what other does
                     self.action = SA.WAIT
