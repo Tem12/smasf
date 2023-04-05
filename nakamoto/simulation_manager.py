@@ -171,6 +171,12 @@ class SimulationManager(SimulationManagerBase):
             is_weak=is_weak_block,
         )
 
+        # clearing of private chains of all attackers which are currently in MATCH
+        match_objects = self.action_store.get_objects(SA.MATCH)
+        for attacker in match_objects:
+            attacker.clear_private_chain()
+            self.action_store.remove_object(SA.MATCH, attacker)
+
     def selfish_override(self, leader: SelfishMinerStrategy) -> None:
         """Override public blockchain with attacker's private blockchain.
 
@@ -183,8 +189,17 @@ class SimulationManager(SimulationManagerBase):
             f" {leader.miner_id} in fork"
         )
         self.public_blockchain.override_chain(leader)
+        # It is necessary to increase last block id on honest chain after override
+        # which happens only if SM wins the block and he is in ongoing fork
+        self.public_blockchain.last_block_id += 1
         # cleaning of competing SM is performed via ADOPT
         leader.clear_private_chain()
+
+        # clearing of private chains of all attackers which are currently in MATCH
+        match_objects = self.action_store.get_objects(SA.MATCH)
+        for attacker in match_objects:
+            attacker.clear_private_chain()
+            self.action_store.remove_object(SA.MATCH, attacker)
 
     def one_round(self, leader, round_id, is_weak_block=False):
         """One round of simulation, where is one new block mined."""
