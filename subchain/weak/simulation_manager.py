@@ -12,14 +12,14 @@ import numpy as np
 from base.blockchain import Blockchain
 from base.miner_base import MinerType
 from base.miner_base import SelfishMinerAction as SA
-from nakamoto.mediator import Mediator as NakamotoMediator
 from nakamoto.my_graphs import plot_block_counts
+from nakamoto.simulation_manager import SimulationManager as NakamotoSimulationManager
 from subchain.weak.honest_miner import HonestMinerStrategy
 from subchain.weak.selfish_miner import SelfishMinerStrategy
 from subchain.weak.sim_config import SimulationConfig
 
 
-class Mediator(NakamotoMediator):
+class SimulationManager(NakamotoSimulationManager):
     """Mediator class for Subchain consensus for running whole simulation."""
 
     def __init__(self, simulation_config: dict, blockchain: str):
