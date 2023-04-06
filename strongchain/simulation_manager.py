@@ -7,6 +7,7 @@ Date: 14.3.2023
 import random
 
 from base.miner_base import MinerType
+from base.miner_base import SelfishMinerAction as SA
 from nakamoto.my_graphs import plot_block_counts
 from nakamoto.simulation_manager import SimulationManager as NakamotoSimulationManager
 from strongchain.blockchain import Blockchain
@@ -67,7 +68,47 @@ class SimulationManager(NakamotoSimulationManager):
         # clearing of competitors is performed inside resolve_matches
 
     def resolve_matches(self) -> None:
-        print("Resolve matches strongchain")
+        """Resolve matches between honest miner and selfish miners."""
+        self.log.info("resolve_matches Strongchain")
+        match_objects = self.action_store.get_objects(SA.MATCH)
+
+        if self.ongoing_fork:
+            self.ongoing_fork = False
+
+            # random choice of winner
+            winner = random.choice(match_objects + [self.honest_miner])
+            if winner.miner_type == MinerType.HONEST:
+                # nothing to do. Not necessary to override the last block
+                pass
+            else:
+                # winner is one of attackers, so override last block on public blockchain
+                self.public_blockchain.override_chain(winner)
+                self.resolve_matches_clear(winner)
+                # clear private chains of competing attackers
+                # and also remove them from action store
+                for attacker in match_objects:
+                    attacker.clear_private_chain()
+                    self.action_store.remove_object(SA.MATCH, attacker)
+
+        elif len(match_objects) == 1:
+            # just one attacker in match phase
+            match_obj = match_objects[0]
+
+            if self.config.gamma == 1:
+                # integrate attacker's last block to the public blockchain
+                self.log.info("SM wins")
+                self.public_blockchain.override_chain(match_obj)
+                match_obj.clear_private_chain()
+
+            else:
+                # gamma is 0 or 0.5. If 0 give attacker 1 round chance to mine new block
+                # If 0.5 give chance attacker to mine new block and also group of honest
+                # miners, which could possibly win the next round
+                self.ongoing_fork = True
+
+        else:
+            # there is no ongoing fork and multiple attackers with match
+            self.ongoing_fork = True
 
     def resolve_overrides_select_from_multiple_attackers(self, attackers):
         attacker_and_pow = []
