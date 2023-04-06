@@ -4,6 +4,7 @@ selfish miner for Nakamoto consensus protocol.
 Author: Jan Jakub Kubik (xkubik32)
 Date: 15.3.2023
 """
+import random
 from typing import Optional, Set
 
 from base.blockchain import Blockchain
@@ -70,8 +71,21 @@ class SelfishMinerStrategy(SelfishMinerStrategyBase):
 
             elif lead == 0:
                 # competitors have the same length as me but I started after ongoing competition
-                # (it means later fork)
+                # (it means later fork) so I randomly choice from ongoing branches and publish
+                # my new block and integrate block to the main chain
                 self.action = SA.MATCH
+
+                winner = random.choice(match_competitors + [public_blockchain])
+                if winner is not public_blockchain:
+                    public_blockchain.chain[-1] = winner.blockchain.chain[-1]
+
+                ongoing_fork = False
+                public_blockchain.override_chain(self)
+                public_blockchain.last_block_id += 1
+
+                # clearing of private chains of all attackers which are currently in MATCH
+                for attacker in match_competitors:
+                    attacker.clear_private_chain()
 
             else:
                 # competitors have longer chain than me
@@ -81,6 +95,8 @@ class SelfishMinerStrategy(SelfishMinerStrategyBase):
         else:
             # no ongoing fork I currently mined new block
             self.action = SA.WAIT
+
+        return ongoing_fork
 
     def lead_length(self, public_blockchain: "Blockchain") -> int:
         """Method for computing leading of selfish miner in comparison to honest miner.

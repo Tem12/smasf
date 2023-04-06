@@ -213,6 +213,9 @@ class SimulationManager(SimulationManagerBase):
         # action = leader.get_and_reset_action()
         action = leader.get_action()
 
+        # honest and selfish miner updates state of ongoing fork
+        self.ongoing_fork = res
+
         if leader.miner_type == MinerType.HONEST:
             # honest miner actions
             # --------------------
@@ -221,8 +224,6 @@ class SimulationManager(SimulationManagerBase):
                 self.add_honest_block(
                     round_id=round_id, honest_miner=leader, is_weak_block=is_weak_block
                 )
-                # only honest miner updates state of ongoing fork
-                self.ongoing_fork = res
 
             else:
                 raise Exception("Fatal error no fork")
