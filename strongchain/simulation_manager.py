@@ -7,6 +7,7 @@ Date: 14.3.2023
 import random
 
 from base.miner_base import MinerType
+from nakamoto.my_graphs import plot_block_counts
 from nakamoto.simulation_manager import SimulationManager as NakamotoSimulationManager
 from strongchain.blockchain import Blockchain
 from strongchain.honest_miner import HonestMinerStrategy
@@ -189,3 +190,27 @@ class SimulationManager(NakamotoSimulationManager):
         print(self.config)
 
         self.run_simulation()
+
+        block_counts = {
+            "Honest miner 44": 0,
+            "Selfish miner 45": 0,
+            "Selfish miner 46": 0,
+            # "Selfish miner 45": 0,
+            # "Selfish miner 46": 0,
+            # "Selfish miner 47": 0,
+            # "Selfish miner 48": 0,
+            # "Selfish miner 49": 0,
+        }
+        # self.log.info(block_counts)
+
+        # self.log.info(block_counts)
+        for block in self.public_blockchain.chain:
+            # self.log.info(block)
+            block_counts[block.miner] += 1
+
+        # import json
+        # print(json.dumps(self.public_blockchain.to_dict()))
+        # self.log.info(block_counts)
+        # self.log.info(self.selfish_miners[0].blockchain.chain)
+
+        plot_block_counts(block_counts, self.miners_info)
