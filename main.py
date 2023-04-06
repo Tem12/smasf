@@ -16,9 +16,6 @@ def run_simulations(parsed_args: Namespace) -> None:
 
     :param parsed_args: valid parsed program arguments
     """
-    print(parsed_args)
-    print(type(parsed_args))
-
     if parsed_args.blockchain == "subchain":
         module_path = parsed_args.blockchain + "." + parsed_args.option
         config_path = parsed_args.blockchain + "/" + parsed_args.option
