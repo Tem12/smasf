@@ -98,6 +98,7 @@ class SimulationManager(SimulationManagerBase):
                 self.log.info("SM wins")
                 self.public_blockchain.override_chain(match_obj)
                 match_obj.clear_private_chain()
+                self.action_store.remove_object(SA.MATCH, match_obj)
 
             else:
                 # gamma is 0 or 0.5. If 0 give attacker 1 round chance to mine new block
