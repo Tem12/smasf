@@ -282,9 +282,21 @@ class SimulationManager(SimulationManagerBase):
         # !!! handle extreme case !!!, when any of selfish miner
         # has the longest chain after the end of simulation.
         # This happens only if any of SM has higher mining power than HM
+        # Select the selfish miner with the longest chain if any exists
+        # or if the length is the same, then random select
         match_attackers = self.action_store.get_objects(SA.WAIT)
         if len(match_attackers) > 0:
-            winner = random.choice(match_attackers)
+            miner_and_len = list()
+            for miner in match_attackers:
+                chain_len = miner.blockchain.size()
+                miner_and_len.append((miner, chain_len))
+
+            # Find the maximum value
+            max_value = max(obj[1] for obj in miner_and_len)
+            # Filter the attackers with the highest value
+            matching_miners = [obj for obj in miner_and_len if obj[1] == max_value]
+            # Select a random object among the ones with the highest value
+            winner = random.choice(matching_miners)[0]
             self.public_blockchain.override_chain(winner)
 
     def run(self):
