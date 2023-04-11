@@ -6,8 +6,7 @@ Date: 23.3.2023
 """
 
 import json
-
-import numpy as np
+import random
 
 from base.blockchain import Blockchain
 from base.miner_base import MinerType
@@ -59,48 +58,26 @@ class SimulationManager(NakamotoSimulationManager):
 
     def run_simulation(self):
         """Main business logic for running selfish mining simulation."""
-
-        # EXPONENTIAL GENERATION OF WEAK AND STRONG BLOCKS
-        # WHICH IS BETTER THAN UNIFORM DISTRIBUTION
-
-        # Average number of rounds between weak block generations
-        avg_rounds_between_weak_blocks = 1
-        # Average number of rounds between strong block generations
-        avg_rounds_between_strong_blocks = self.config.weak_to_strong_block_ratio
-        simulation_rounds = self.config.simulation_mining_rounds
-
-        # Generate random block generation rounds for weak and strong blocks
-        weak_block_rounds = np.random.exponential(
-            scale=avg_rounds_between_weak_blocks, size=simulation_rounds
-        ).cumsum()
-        strong_block_rounds = np.random.exponential(
-            scale=avg_rounds_between_strong_blocks, size=simulation_rounds
-        ).cumsum()
-        # Simulation loop
-        weak_block_idx = 0
-        strong_block_idx = 0
+        total_blocks = self.config.weak_to_strong_block_ratio + 1
+        weak_block_probability = self.config.weak_to_strong_block_ratio / total_blocks
+        weak_blocks = 0
+        strong_blocks = 0
 
         for blocks_mined in range(self.config.simulation_mining_rounds):
             leader = self.choose_leader(self.miners, self.miners_info)
 
             # Check if it's time to generate a weak block
-            if (
-                weak_block_idx < len(weak_block_rounds)
-                and blocks_mined >= weak_block_rounds[weak_block_idx]
-            ):
+            random_number = random.random()
+            if random_number <= weak_block_probability:
                 print(f"Weak block generated in round {blocks_mined}")
-                weak_block_idx += 1
+                weak_blocks += 1
 
                 self.one_round(leader, blocks_mined, is_weak_block=True)
 
             # Check if it's time to generate a strong block
-            if (
-                strong_block_idx < len(strong_block_rounds)
-                and blocks_mined >= strong_block_rounds[strong_block_idx]
-            ):
+            else:
                 print(f"Strong block generated in round {blocks_mined}")
-                print("-----------------" * 5)
-                strong_block_idx += 1
+                strong_blocks += 1
 
                 if leader.miner_type == MinerType.SELFISH:
                     continue
@@ -124,10 +101,12 @@ class SimulationManager(NakamotoSimulationManager):
                 self.action_store.clear()
                 self.ongoing_fork = False
 
+                # clear public blockchain of weak blocks
                 self.public_blockchain.chain = []
                 self.public_blockchain.last_block_id = 0
                 self.public_blockchain.fork_block_id = None
 
+                # clear private weak blockchains of attackers
                 for selfish_miner in self.selfish_miners:
                     selfish_miner.blockchain.chain = []
                     selfish_miner.blockchain.last_block_id = 0
