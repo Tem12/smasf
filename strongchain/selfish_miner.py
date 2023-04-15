@@ -54,59 +54,57 @@ class SelfishMinerStrategy(NakamotoSelfishMinerStrategy):
         )
 
         # check powers of blockchains and if necessary update actions
-        # adopt and wait - no need to check
-        # if self.action in [SA.MATCH, SA.OVERRIDE]:  # maybe also SA.WAIT
-        if self.action in [SA.OVERRIDE]:  # maybe also SA.WAIT
-            sm_chain_pow = self.blockchain.chains_pow()
-            hm_chain_pow = public_blockchain.chains_pow_from_index(
-                self.blockchain.fork_block_id
-            )
-            # import json
-            # print(json.dumps(self.blockchain.to_dict()))
-            # print(f"Selfish chains pow is: {sm_chain_pow}")
-            # print(json.dumps(public_blockchain.to_dict()))
-            # print(f"Pubic chains pow is: {public_blockchain.chains_pow()}")
-            # print(sm_chain_pow)
-            # print(hm_chain_pow)
-            # exit()
+        sm_chain_pow = self.blockchain.chains_pow()
+        hm_chain_pow = public_blockchain.chains_pow_from_index(
+            self.blockchain.fork_block_id
+        )
 
-            if sm_chain_pow == hm_chain_pow:
-                self.log.info("mine_new_block changing OVERRIDE to MATCH")
-                self.action = SA.MATCH
-
-            elif sm_chain_pow > hm_chain_pow:
-                self.log.info("mine_new_block NOT changing OVERRIDE")
+        if sm_chain_pow > hm_chain_pow:
+            # should be changed to config parameters
+            if sm_chain_pow > 1 and sm_chain_pow - 1 <= hm_chain_pow:
+                # self.log.info("mine_new_block NOT changing OVERRIDE")
                 self.action = SA.OVERRIDE
-
             else:
-                self.log.info("mine_new_block changing OVERRIDE to ADOPT")
-                self.clear_private_chain()
-                self.action = SA.ADOPT
+                self.action = SA.WAIT
+
+        else:
+            # self.log.info("mine_new_block changing OVERRIDE to ADOPT")
+            self.clear_private_chain()
+            self.action = SA.ADOPT
 
     def decide_next_action(self, public_blockchain: "Blockchain", leader: int) -> SA:
-        action = super().decide_next_action(public_blockchain, leader)
+        # check powers of blockchains and if necessary update actions
+        sm_chain_pow = self.blockchain.chains_pow()
+        hm_chain_pow = public_blockchain.chains_pow_from_index(
+            self.blockchain.fork_block_id
+        )
+
+        if sm_chain_pow > hm_chain_pow:
+            if sm_chain_pow > 1 and sm_chain_pow - 1 <= hm_chain_pow:
+                # self.log.info("decide_next_action NOT changing OVERRIDE")
+                self.action = SA.OVERRIDE
+            else:
+                self.action = SA.WAIT
+
+        else:
+            # self.log.info("decide_next_action changing OVERRIDE to ADOPT")
+            self.clear_private_chain()
+            self.action = SA.ADOPT
+
+        return self.action
+
+    def decide_next_action_weak(self, public_blockchain: "Blockchain") -> SA:
+        """Decide next action after HM mines and broadcasts new weak header."""
 
         # check powers of blockchains and if necessary update actions
-        # adopt and wait - no need to check
-        # if action in [SA.MATCH, SA.OVERRIDE]:  # maybe also SA.WAIT
-        if action in [SA.OVERRIDE]:  # maybe also SA.WAIT
-            sm_chain_pow = self.blockchain.chains_pow()
-            hm_chain_pow = public_blockchain.chains_pow_from_index(
-                self.blockchain.fork_block_id
-            )
+        sm_chain_pow = self.blockchain.chains_pow()
+        hm_chain_pow = public_blockchain.chains_pow_from_index(
+            self.blockchain.fork_block_id
+        )
 
-            if sm_chain_pow == hm_chain_pow:
-                self.log.info("decide_next_action changing OVERRIDE to MATCH")
-                self.action = SA.MATCH
-
-            elif sm_chain_pow > hm_chain_pow:
-                self.log.info("decide_next_action NOT changing OVERRIDE")
+        if sm_chain_pow > hm_chain_pow:
+            if sm_chain_pow > 1 and sm_chain_pow - 1 <= hm_chain_pow:
                 self.action = SA.OVERRIDE
-
-            else:
-                self.log.info("decide_next_action changing OVERRIDE to ADOPT")
-                self.clear_private_chain()
-                self.action = SA.ADOPT
 
         return self.action
 

@@ -60,84 +60,6 @@ class SimulationManager(NakamotoSimulationManager):
             weak_to_strong_header_ratio=sim_config["weak_to_strong_header_ratio"],
         )
 
-    def resolve_matches_clear(self, winner):
-        print("Resolve matches clear strongchain")
-        winner.clear_private_strong_chain()
-        # clear private weak chain of selfish miner
-        self.honest_miner.clear_private_weak_chain()
-        # clearing of competitors is performed inside resolve_matches
-
-    def resolve_matches(self) -> None:
-        """Resolve matches between honest miner and selfish miners."""
-        self.log.info("resolve_matches Strongchain")
-        match_objects = self.action_store.get_objects(SA.MATCH)
-
-        if self.ongoing_fork:
-            self.ongoing_fork = False
-
-            # select winner according to his chain power
-            winner = self.select_miner_with_strongest_chain(
-                selfish_miners=match_objects, use_hm=True
-            )
-
-            if winner.miner_type == MinerType.HONEST:
-                # clear competing sm chains
-                for attacker in match_objects:
-                    attacker.clear_private_chain()
-                    self.action_store.remove_object(SA.MATCH, attacker)
-            else:
-                # winner is one of attackers, so override last block on public blockchain
-                self.public_blockchain.override_chain(winner)
-                self.resolve_matches_clear(winner)
-                # clear private chains of competing attackers
-                # and also remove them from action store
-                for attacker in match_objects:
-                    attacker.clear_private_chain()
-                    self.action_store.remove_object(SA.MATCH, attacker)
-
-        elif len(match_objects) == 1:
-            # just one attacker in match phase
-
-            match_obj = match_objects[0]
-            sm_pow = match_obj.blockchain.chains_pow()
-            hm_pow = self.public_blockchain.chains_pow_from_index(
-                match_obj.blockchain.fork_block_id
-            )
-
-            if sm_pow > hm_pow:
-                # SM has stronher chain -> override public chain and clear everything necessary
-                self.log.info("Selfish is stronger than honest miner")
-                self.public_blockchain.override_chain(match_obj)
-                self.resolve_matches_clear(match_obj)
-
-            elif sm_pow < hm_pow:
-                # HM has stronger chain -> nothing to do just clearing competing sm chains
-                self.log.info("Honest miner is stronger than selfish miner")
-                match_obj.clear_private_chain()
-                self.action_store.remove_object(SA.MATCH, match_obj)
-
-            # the chains have totally the same strength - so behave as for Nakamoto
-            else:
-                self.log.info("Selfish miner has the same chain power as honest miner")
-                if self.config.gamma == 1:
-                    # integrate attacker's last block to the public blockchain
-                    self.log.info("SM wins")
-                    self.public_blockchain.override_chain(match_obj)
-                    match_obj.clear_private_chain()
-
-                else:
-                    # gamma is 0 or 0.5. If 0 give attacker 1 round chance to mine new block
-                    # If 0.5 give chance attacker to mine new block and also group of honest
-                    # miners, which could possibly win the next round
-                    self.ongoing_fork = True
-
-        else:
-            # there is no ongoing fork and multiple attackers with match
-
-            # TODO: Also check power and do things according to it
-
-            self.ongoing_fork = True
-
     def select_miner_with_strongest_chain(self, selfish_miners, use_hm=None):
         """Select miner among all miners according to his chian power."""
         miner_and_pow = []
@@ -172,10 +94,6 @@ class SimulationManager(NakamotoSimulationManager):
         self.honest_miner.clear_private_weak_chain()
         # clearing of competitors is performed inside resolve_overrides
 
-    # def resolve_overrides(self) -> None:
-    # Not necessary -
-    #     print("Resolve overrides strongchain")
-
     def selfish_override(self, leader: SelfishMinerStrategy) -> None:
         # override public blockchain by attacker's private blockchain
 
@@ -186,6 +104,7 @@ class SimulationManager(NakamotoSimulationManager):
             f" {leader.miner_id} in fork"
         )
         self.public_blockchain.override_chain(leader)
+        self.public_blockchain.last_block_id = self.public_blockchain.size()
         # cleaning of competing SM is performed via ADOPT
         leader.clear_private_strong_chain()
         # cleaning of competing SM is performed via ADOPT
@@ -207,6 +126,11 @@ class SimulationManager(NakamotoSimulationManager):
         )
         self.honest_miner.clear_private_weak_chain()
 
+    def resolve_overrides(self):
+        super().resolve_overrides()
+        # update actual last block id
+        self.public_blockchain.last_block_id = self.public_blockchain.size()
+
     def clear_sm_weak_headers_if_no_fork(self):
         """Clear weak blocks of selfish miners without fork."""
         for selfish_miner in self.selfish_miners:
@@ -215,8 +139,10 @@ class SimulationManager(NakamotoSimulationManager):
 
     def run_simulation(self):
         """Main business logic for running selfish mining simulation."""
-        strong = {44: 0, 45: 0, 46: 0, 47: 0, 48: 0, 49: 0, 50: 0, 51: 0}
-        weak = {44: 0, 45: 0, 46: 0, 47: 0, 48: 0, 49: 0, 50: 0, 51: 0}
+        self.winns = {42: 0, 43: 0, 44: 0, 45: 0, 46: 0, 47: 0, 48: 0, 49: 0}
+
+        self.strong = {44: 0, 45: 0, 46: 0, 47: 0, 48: 0, 49: 0, 50: 0, 51: 0}
+        self.weak = {44: 0, 45: 0, 46: 0, 47: 0, 48: 0, 49: 0, 50: 0, 51: 0}
 
         total_headers = self.config.weak_to_strong_header_ratio + 1
         weak_header_probability = (
@@ -227,6 +153,7 @@ class SimulationManager(NakamotoSimulationManager):
 
         for blocks_mined in range(self.config.simulation_mining_rounds):
             leader = self.choose_leader(self.miners, self.miners_info)
+            self.winns[leader.miner_id] += 1
 
             random_number = random.random()
             if random_number <= weak_header_probability:
@@ -241,23 +168,42 @@ class SimulationManager(NakamotoSimulationManager):
                     miner=f"{miner_str} miner {leader.miner_id}",
                     miner_id=leader.miner_id,
                 )
-                weak[leader.miner_id] += 1
+                self.weak[leader.miner_id] += 1
                 weak_headers += 1
                 # print(leader.weak_headers)
                 # print(json.dumps([x.to_dict() for x in leader.weak_headers]))
+
+                if leader.miner_type == MinerType.HONEST:
+                    while True:
+                        # override loop
+                        self.action_store.clear()
+
+                        for selfish_miner in self.selfish_miners:
+                            action = selfish_miner.decide_next_action_weak(
+                                self.public_blockchain, leader
+                            )
+                            self.action_store.add_object(action, selfish_miner)
+                        all_actions = self.action_store.get_actions()
+
+                        # replacement for `do-while` which is not in python
+                        condition = SA.OVERRIDE in all_actions
+                        if not condition:
+                            break
+
+                        self.resolve_overrides()
 
             else:
                 print(
                     f"Strong header generated in round {blocks_mined} by {leader.miner_type}"
                 )
 
-                # # this fulfill the condition, that weak header points to the
+                # # this fulfills the condition, that weak header points to the
                 # previously mined strong block in main chain
-                # if leader.miner_type == MinerType.HONEST:
-                #     self.clear_sm_weak_headers_if_no_fork()
+                if leader.miner_type == MinerType.HONEST:
+                    self.clear_sm_weak_headers_if_no_fork()
 
                 self.one_round(leader, blocks_mined, is_weak_block=False)
-                strong[leader.miner_id] += 1
+                self.strong[leader.miner_id] += 1
                 strong_headers += 1
 
         print(f"number of weak blocks: {weak_headers}")
@@ -268,8 +214,18 @@ class SimulationManager(NakamotoSimulationManager):
         print(
             f"Their probability: {(strong_headers / (weak_headers + strong_headers) * 100)}%"
         )
-        print(strong)
-        print(weak)
+        print(self.strong)
+        print(self.weak)
+
+        # !!! handle extreme case !!!, when any of selfish miner
+        # has the longest chain after the end of simulation.
+        # This happens only if any of SM has higher mining power than HM
+        # Select the selfish miner with the longest chain if any exists
+        # or if the length is the same, then random select
+        match_attackers = self.action_store.get_objects(SA.WAIT)
+        if len(match_attackers) > 0:
+            winner = self.select_miner_with_strongest_chain(match_attackers)
+            self.public_blockchain.override_chain(winner)
 
     def run(self):
         """This method is entry point for running all checks for specific provider monitor."""
@@ -282,22 +238,58 @@ class SimulationManager(NakamotoSimulationManager):
         block_counts = {
             "Honest miner 44": 0,
             "Selfish miner 45": 0,
-            "Selfish miner 46": 0,
-            # "Selfish miner 47": 0,
+            # "Selfish miner 48": 0,
+            # "Selfish miner 49": 0,
             # "Selfish miner 48": 0,
             # "Selfish miner 49": 0,
             # "Selfish miner 50": 0,
             # "Selfish miner 51": 0,
         }
+        block_counts_same = {
+            "Honest miner 44 weak": 0,
+            "Honest miner 44 strong": 0,
+            "Selfish miner 45 weak": 0,
+            "Selfish miner 45 strong": 0,
+            # "Selfish miner 48": 0,
+            # "Selfish miner 49": 0,
+            # "Selfish miner 48": 0,
+            # "Selfish miner 49": 0,
+            # "Selfish miner 50": 0,
+            # "Selfish miner 51": 0,
+        }
+
         # self.log.info(block_counts)
 
         # self.log.info(block_counts)
         for block in self.public_blockchain.chain:
             # self.log.info(block)
             block_counts[block.miner] += 1
+            block_counts_same[block.miner + " strong"] += 1
 
             for _ in block.weak_headers:
-                block_counts[block.miner] += 1
+                block_counts[block.miner] += 1 / 100
+                block_counts_same[block.miner + " weak"] += 1
+
+        all_blocks_count = 0
+        for count in block_counts.values():
+            all_blocks_count += count
+        print(all_blocks_count)
+
+        def float_with_comma(number):
+            return str(number).replace(".", ",")
+
+        print("-------------")
+        success_1 = round(block_counts["Selfish miner 45"] / all_blocks_count * 100, 3)
+        print(float_with_comma(success_1))
+        print(self.winns[45])
+        print(float_with_comma(block_counts_same["Selfish miner 45 strong"]))
+        print(float_with_comma(block_counts_same["Selfish miner 45 weak"]))
+
+        print(float_with_comma(round(100 - success_1, 3)))
+        # print(self.winns)
+        print(self.winns[44])
+        print(float_with_comma(block_counts_same["Honest miner 44 strong"]))
+        print(float_with_comma(block_counts_same["Honest miner 44 weak"]))
 
         # import json
         # print(json.dumps(self.public_blockchain.to_dict()))

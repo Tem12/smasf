@@ -3,9 +3,13 @@
     consensus_name: Strongchain
     miners:
       honest:
-        mining_power: 75
+        mining_power: 54
       selfish:
-        - mining_power: 25
+        - mining_power: 46
+#        - mining_power: 15
+#        - mining_power: 15
+#        - mining_power: 15
+#        - mining_power: 15
     gamma: 0.5
-    weak_to_strong_header_ratio: 10
-    simulation_mining_rounds: 1000
+    weak_to_strong_header_ratio: 100
+    simulation_mining_rounds: 100_000
