@@ -93,8 +93,9 @@ class SelfishMinerStrategy(NakamotoSelfishMinerStrategy):
 
         return self.action
 
-    def decide_next_action_weak(self, public_blockchain: "Blockchain") -> SA:
+    def decide_next_action_weak(self, public_blockchain: "Blockchain", leader) -> SA:
         """Decide next action after HM mines and broadcasts new weak header."""
+        super().decide_next_action(public_blockchain, leader)
 
         # check powers of blockchains and if necessary update actions
         sm_chain_pow = self.blockchain.chains_pow()
