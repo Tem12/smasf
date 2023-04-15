@@ -180,7 +180,7 @@ class SimulationManager(NakamotoSimulationManager):
 
                         for selfish_miner in self.selfish_miners:
                             action = selfish_miner.decide_next_action_weak(
-                                self.public_blockchain, leader
+                                self.public_blockchain
                             )
                             self.action_store.add_object(action, selfish_miner)
                         all_actions = self.action_store.get_actions()
