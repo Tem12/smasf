@@ -24,7 +24,7 @@ Include code snippets, screenshots, or any other relevant information.
 
 - Nakamoto consensus [workflow diagram](https://miro.com/app/board/uXjVMeBFZw8=/?share_link_id=254956633663)
 - Subchain consensus [workflow diagrams](https://miro.com/app/board/uXjVMaBHSA8=/?share_link_id=48031802517)
-- Strongchain consensus [workflow diagram](https://miro.com/app/board/uXjVMZA5Qwk=/?share_link_id=74039294125)
+- Strongchain consensus [workflow diagram](https://miro.com/app/board/uXjVMZAjw5U=/?share_link_id=459699217455)
 
 ## Simulation experiments
 
