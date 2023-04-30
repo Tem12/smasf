@@ -180,7 +180,9 @@ class SimulationManager(NakamotoSimulationManager):
 
                         for selfish_miner in self.selfish_miners:
                             action = selfish_miner.decide_next_action_weak(
-                                self.public_blockchain, leader
+                                self.public_blockchain,
+                                leader,
+                                self.config.weak_to_strong_header_ratio,
                             )
                             self.action_store.add_object(action, selfish_miner)
                         all_actions = self.action_store.get_actions()
@@ -267,7 +269,7 @@ class SimulationManager(NakamotoSimulationManager):
             block_counts_same[block.miner + " strong"] += 1
 
             for _ in block.weak_headers:
-                block_counts[block.miner] += 1 / 100
+                block_counts[block.miner] += 1 / self.config.weak_to_strong_header_ratio
                 block_counts_same[block.miner + " weak"] += 1
 
         all_blocks_count = 0
@@ -294,6 +296,6 @@ class SimulationManager(NakamotoSimulationManager):
         # import json
         # print(json.dumps(self.public_blockchain.to_dict()))
         # self.log.info(block_counts)
-        # self.log.info(self.selfish_miners[0].blockchain.chain)
+        # self.log.info(self.selfish_miners[0].blockchain.to_dict())
 
         plot_block_counts(block_counts, self.miners_info)
