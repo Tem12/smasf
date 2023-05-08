@@ -8,8 +8,13 @@ import random
 
 from base.miner_base import MinerType
 from base.miner_base import SelfishMinerAction as SA
-from nakamoto.my_graphs import plot_block_counts
 from nakamoto.simulation_manager import SimulationManager as NakamotoSimulationManager
+from public_blockchain_functions import (
+    calculate_percentage,
+    plot_block_counts,
+    print_attackers_success,
+    print_honest_miner_info,
+)
 from strongchain.blockchain import Blockchain
 from strongchain.honest_miner import HonestMinerStrategy
 from strongchain.selfish_miner import SelfishMinerStrategy
@@ -139,10 +144,16 @@ class SimulationManager(NakamotoSimulationManager):
 
     def run_simulation(self):
         """Main business logic for running selfish mining simulation."""
-        self.winns = {42: 0, 43: 0, 44: 0, 45: 0, 46: 0, 47: 0, 48: 0, 49: 0}
+        self.winns = {
+            miner.miner_id: 0 for miner in self.selfish_miners + [self.honest_miner]
+        }
 
-        self.strong = {44: 0, 45: 0, 46: 0, 47: 0, 48: 0, 49: 0, 50: 0, 51: 0}
-        self.weak = {44: 0, 45: 0, 46: 0, 47: 0, 48: 0, 49: 0, 50: 0, 51: 0}
+        self.strong = {
+            miner.miner_id: 0 for miner in self.selfish_miners + [self.honest_miner]
+        }
+        self.weak = {
+            miner.miner_id: 0 for miner in self.selfish_miners + [self.honest_miner]
+        }
 
         total_headers = self.config.weak_to_strong_header_ratio + 1
         weak_header_probability = (
@@ -237,30 +248,17 @@ class SimulationManager(NakamotoSimulationManager):
 
         self.run_simulation()
 
-        block_counts = {
-            "Honest miner 44": 0,
-            "Selfish miner 45": 0,
-            # "Selfish miner 48": 0,
-            # "Selfish miner 49": 0,
-            # "Selfish miner 48": 0,
-            # "Selfish miner 49": 0,
-            # "Selfish miner 50": 0,
-            # "Selfish miner 51": 0,
-        }
-        block_counts_same = {
-            "Honest miner 44 weak": 0,
-            "Honest miner 44 strong": 0,
-            "Selfish miner 45 weak": 0,
-            "Selfish miner 45 strong": 0,
-            # "Selfish miner 48": 0,
-            # "Selfish miner 49": 0,
-            # "Selfish miner 48": 0,
-            # "Selfish miner 49": 0,
-            # "Selfish miner 50": 0,
-            # "Selfish miner 51": 0,
-        }
+        block_counts = {f"Honest miner {self.honest_miner.miner_id}": 0}
+        for miner in self.selfish_miners:
+            block_counts.update({f"Selfish miner {miner.miner_id}": 0})
 
-        # self.log.info(block_counts)
+        block_counts_same = {f"Honest miner {self.honest_miner.miner_id} weak": 0}
+        block_counts_same.update(
+            {f"Honest miner {self.honest_miner.miner_id} strong": 0}
+        )
+        for miner in self.selfish_miners:
+            block_counts_same.update({f"Selfish miner {miner.miner_id} weak": 0})
+            block_counts_same.update({f"Selfish miner {miner.miner_id} strong": 0})
 
         # self.log.info(block_counts)
         for block in self.public_blockchain.chain:
@@ -272,26 +270,27 @@ class SimulationManager(NakamotoSimulationManager):
                 block_counts[block.miner] += 1 / self.config.weak_to_strong_header_ratio
                 block_counts_same[block.miner + " weak"] += 1
 
-        all_blocks_count = 0
-        for count in block_counts.values():
-            all_blocks_count += count
+        all_blocks_count = sum(block_counts.values())
         print(all_blocks_count)
 
-        def float_with_comma(number):
-            return str(number).replace(".", ",")
+        attacker_ids = [
+            miner.miner_id for miner in self.selfish_miners
+        ]  # List of attacker IDs
+        honest_miner_id = self.honest_miner.miner_id  # Honest miner ID
 
-        print("-------------")
-        success_1 = round(block_counts["Selfish miner 45"] / all_blocks_count * 100, 3)
-        print(float_with_comma(success_1))
-        print(self.winns[45])
-        print(float_with_comma(block_counts_same["Selfish miner 45 strong"]))
-        print(float_with_comma(block_counts_same["Selfish miner 45 weak"]))
-
-        print(float_with_comma(round(100 - success_1, 3)))
-        # print(self.winns)
-        print(self.winns[44])
-        print(float_with_comma(block_counts_same["Honest miner 44 strong"]))
-        print(float_with_comma(block_counts_same["Honest miner 44 weak"]))
+        all_blocks_count = sum(block_counts.values())
+        percentages = calculate_percentage(block_counts, all_blocks_count)
+        print_attackers_success(
+            block_counts, percentages, self.winns, attacker_ids, block_counts_same, True
+        )
+        print_honest_miner_info(
+            block_counts,
+            percentages,
+            self.winns,
+            honest_miner_id,
+            block_counts_same,
+            True,
+        )
 
         # import json
         # print(json.dumps(self.public_blockchain.to_dict()))
