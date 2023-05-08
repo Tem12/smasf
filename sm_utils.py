@@ -14,10 +14,13 @@ def parse_args():
         description="Simulate selfish mining on different blockchains."
     )
 
-    subparsers = parser.add_subparsers(dest="blockchain", help="sub-command help")
+    subparsers = parser.add_subparsers(dest="blockchain")
 
     # Create the parser for the first choice
-    subchain = subparsers.add_parser("subchain", help="Subchain blockchain simulation")
+    subchain = subparsers.add_parser(
+        "subchain",
+        help="Subchain blockchain simulation with mandatory 'weak' or 'strong' parameter",
+    )
     subchain.add_argument(
         "option",
         choices=["weak", "strong"],
