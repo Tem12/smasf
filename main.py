@@ -12,9 +12,11 @@ from sm_utils import load_simulations_config, parse_args
 
 def run_simulations(parsed_args: Namespace) -> None:
     """Run selfish mining simulations.
-    Run selfish mining simulations according to yaml config for selected consensus protocol.
 
-    :param parsed_args: valid parsed program arguments
+    Run selfish mining simulations according to the YAML config for the selected consensus protocol.
+
+    Args:
+        parsed_args (Namespace): Valid parsed program arguments.
     """
     if parsed_args.blockchain == "subchain":
         module_path = parsed_args.blockchain + "." + parsed_args.option
@@ -31,8 +33,8 @@ def run_simulations(parsed_args: Namespace) -> None:
         sim_manager.run()
 
 
-def main():
-    """Main function of whole program."""
+def main() -> None:
+    """Main function of the whole program."""
     args = parse_args()
     run_simulations(args)
     log = create_logger("main")

@@ -66,17 +66,19 @@ def float_with_comma(number: float) -> str:
     return str(number).replace(".", ",")
 
 
-def calculate_percentage(block_counts: dict, total_blocks: int) -> dict:
+def calculate_percentage(
+    block_counts: Dict[str, int], total_blocks: int
+) -> Dict[str, float]:
     """
     Calculate the percentage of blocks mined by each miner.
 
     Args:
-        block_counts (dict): A dictionary with miner names as keys and the
+        block_counts (Dict[str, int]): A dictionary with miner names as keys and the
                              number of blocks mined as values.
         total_blocks (int): The total number of blocks mined.
 
     Returns:
-        dict: A dictionary with miner names as keys and their corresponding percentage
+        Dict[str, float]: A dictionary with miner names as keys and their corresponding percentage
               of blocks mined as values.
     """
     return {
@@ -85,6 +87,7 @@ def calculate_percentage(block_counts: dict, total_blocks: int) -> dict:
     }
 
 
+# pylint: disable=too-many-arguments
 def print_attackers_success(
     block_counts: Dict[str, int],
     percentages: Dict[str, float],
@@ -99,13 +102,15 @@ def print_attackers_success(
     Args:
         block_counts (Dict[str, int]): A dictionary with miner names as keys and the number of
                              blocks mined as values.
-        percentages (Dict[str, float]): A dictionary with miner names as keys and their corresponding
-                            percentage of blocks mined as values.
-        winns (Dict[int, Union[int, float]]): A dictionary with miner IDs as keys and their corresponding winn values.
+        percentages (Dict[str, float]): A dictionary with miner names as keys and their
+                                        corresponding percentage of blocks mined as values.
+        winns (Dict[int, Union[int, float]]): A dictionary with miner IDs as keys and
+                                              their corresponding winn values.
         attacker_ids (List[int]): A list of attacker IDs.
-        block_counts_same (Dict[str, int]): A dictionary with miner names as keys and the number of
-                             blocks mined as values for the same mining strategy.
-        is_strongchain (bool, optional): A flag to indicate if the mining strategy is strongchain. Defaults to False.
+        block_counts_same (Dict[str, int], optional): A dictionary with miner names as keys
+                        and the number of blocks mined as values for the same mining strategy.
+        is_strongchain (bool, optional): A flag to indicate if the mining strategy is
+                                        strongchain. Defaults to False.
 
     Returns:
         None
@@ -124,6 +129,7 @@ def print_attackers_success(
             print(block_counts[attacker_name])
 
 
+# pylint: disable=too-many-arguments
 def print_honest_miner_info(
     block_counts: Dict[str, int],
     percentages: Dict[str, float],
@@ -136,15 +142,17 @@ def print_honest_miner_info(
     Print the success information of an honest miner.
 
     Args:
-        block_counts (Dict[str, int]): A dictionary with miner names as keys and the number of blocks
-                             mined as values.
-        percentages (Dict[str, float]): A dictionary with miner names as keys and their corresponding
-                            percentage of blocks mined as values.
-        winns (Dict[int, Union[int, float]]): A dictionary with miner IDs as keys and their corresponding winn values.
+        block_counts (Dict[str, int]): A dictionary with miner names as keys and the number
+                                       of blocks mined as values.
+        percentages (Dict[str, float]): A dictionary with miner names as keys and their
+                                        corresponding percentage of blocks mined as values.
+        winns (Dict[int, Union[int, float]]): A dictionary with miner IDs as keys and their
+                                              corresponding winn values.
         miner_id (int): The ID of the honest miner.
-        block_counts_same (Dict[str, int]): A dictionary with miner names as keys and the number of
-                             blocks mined as values for the same mining strategy.
-        is_strongchain (bool, optional): A flag to indicate if the mining strategy is strongchain. Defaults to False.
+        block_counts_same (Dict[str, int], optional): A dictionary with miner names as keys and
+                the number of blocks mined as values for the same mining strategy.
+        is_strongchain (bool, optional): A flag to indicate if the mining strategy is strongchain.
+                                         Defaults to False.
 
     Returns:
         None
