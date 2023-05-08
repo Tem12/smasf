@@ -8,8 +8,13 @@ Date: 23.3.2023
 import random
 
 from base.miner_base import MinerType
-from nakamoto.my_graphs import plot_block_counts
 from nakamoto.simulation_manager import SimulationManager as NakamotoSimulationManager
+from public_blockchain_functions import (
+    calculate_percentage,
+    plot_block_counts,
+    print_attackers_success,
+    print_honest_miner_info,
+)
 from subchain.sim_config import SimulationConfig
 from subchain.strong.blockchain import Blockchain
 from subchain.strong.honest_miner import HonestMinerStrategy
@@ -87,6 +92,10 @@ class SimulationManager(NakamotoSimulationManager):
 
     def run_simulation(self):
         """Main business logic for running selfish mining simulation."""
+        self.winns = {
+            miner.miner_id: 0 for miner in self.selfish_miners + [self.honest_miner]
+        }
+
         total_blocks = self.config.weak_to_strong_block_ratio + 1
         weak_block_probability = self.config.weak_to_strong_block_ratio / total_blocks
         weak_blocks = 0
@@ -94,6 +103,7 @@ class SimulationManager(NakamotoSimulationManager):
 
         for blocks_mined in range(self.config.simulation_mining_rounds):
             leader = self.choose_leader(self.miners, self.miners_info)
+            self.winns[leader.miner_id] += 1
 
             random_number = random.random()
             if random_number <= weak_block_probability:
@@ -110,7 +120,7 @@ class SimulationManager(NakamotoSimulationManager):
                     is_weak=True,
                 )
                 weak_blocks += 1
-                # pass
+
             else:
                 print(
                     f"Strong block generated in round {blocks_mined} by {leader.miner_type}"
@@ -128,48 +138,26 @@ class SimulationManager(NakamotoSimulationManager):
         )
 
     def run(self):
-        self.log.info("Mediator in Subchain")
+        self.log.info("Mediator in Subchain STRONG blocks")
 
         self.run_simulation()
 
-        # show only strong blocks
-        self.visualize(show_all=False, weak=False)
+        block_counts = {f"Honest miner {self.honest_miner.miner_id}": 0}
+        for miner in self.selfish_miners:
+            block_counts.update({f"Selfish miner {miner.miner_id}": 0})
 
-        # show only weak blocks
-        self.visualize(show_all=False, weak=True)
-
-        # show all blocks together (weak and strong)
-        self.visualize(show_all=True, weak=False)
-
-    def visualize(self, show_all, weak):
-        """Visualize public blockchain after the simulation."""
-        block_counts = {
-            "Honest miner 44": 0,
-            "Selfish miner 45": 0,
-            # "Selfish miner 44": 0,
-            # "Selfish miner 45": 0,
-            # "Selfish miner 46": 0,
-            # "Selfish miner 47": 0,
-            # "Selfish miner 48": 0,
-            # "Selfish miner 49": 0,
-        }
-        # self.log.info(block_counts)
-
-        # self.log.info(block_counts)
-
-        # print(json.dumps(self.public_blockchain.to_dict()))
         for block in self.public_blockchain.chain:
-            if show_all:
-                # all blocks
-                block_counts[block.miner] += 1
-            elif weak:
-                # only weak blocks
-                if block.is_weak:
-                    block_counts[block.miner] += 1
-            else:
-                # only strong blocks
-                if not block.is_weak:
-                    block_counts[block.miner] += 1
+            block_counts[block.miner] += 1
+
+        attacker_ids = [
+            miner.miner_id for miner in self.selfish_miners
+        ]  # List of attacker IDs
+        honest_miner_id = self.honest_miner.miner_id  # Honest miner ID
+
+        total_blocks = sum(block_counts.values())
+        percentages = calculate_percentage(block_counts, total_blocks)
+        print_attackers_success(block_counts, percentages, self.winns, attacker_ids)
+        print_honest_miner_info(block_counts, percentages, self.winns, honest_miner_id)
 
         # self.log.info(block_counts)
         # self.log.info(self.selfish_miners[0].blockchain.chain)
