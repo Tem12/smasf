@@ -7,5 +7,5 @@
       selfish:
         - mining_power: 49
     gamma: 0.5
-    weak_to_strong_block_ratio: 5
+    weak_to_strong_block_ratio: 4
     simulation_mining_rounds: 200_000
