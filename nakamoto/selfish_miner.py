@@ -34,19 +34,23 @@ class SelfishMinerStrategy(SelfishMinerStrategyBase):
     def mine_new_block(
         self,
         mining_round: int,
-        public_blockchain: "Blockchain",
+        public_blockchain: Blockchain,
         ongoing_fork: bool,
-        match_competitors: Optional[Set[int]] = None,
+        match_competitors: Optional[Set["SelfishMinerStrategyBase"]] = None,
         gamma: Optional[float] = None,
-    ) -> None:
+    ) -> bool:
         """Mine a new block as a selfish miner for the Nakamoto consensus.
 
         Args:
             mining_round (int): The current mining round.
             public_blockchain (Blockchain): The public blockchain.
             ongoing_fork (bool): Indicates if there is an ongoing fork.
-            match_competitors (set, optional): A set of competing selfish miners.
+            match_competitors (Set[SelfishMinerStrategyBase], optional): A set of competing
+                                                                         selfish miners.
             gamma (float, optional): The gamma value for the simulation.
+
+        Returns:
+            bool: Whether the fork is ongoing after the block is mined.
         """
         self.log.info(
             f"Selfish miner: {self.miner_id} is leader of round: {mining_round}"
@@ -91,14 +95,13 @@ class SelfishMinerStrategy(SelfishMinerStrategyBase):
                 # competitors have longer chain than me
                 self.clear_private_chain()
                 self.action = SA.ADOPT
-
         else:
             # no ongoing fork I currently mined new block
             self.action = SA.WAIT
 
         return ongoing_fork
 
-    def lead_length(self, public_blockchain: "Blockchain") -> int:
+    def lead_length(self, public_blockchain: Blockchain) -> int:
         """Method for computing leading of selfish miner in comparison to honest miner.
 
         Args:
@@ -109,7 +112,7 @@ class SelfishMinerStrategy(SelfishMinerStrategyBase):
         """
         return self.blockchain.length() - public_blockchain.last_block_id
 
-    def decide_next_action(self, public_blockchain: "Blockchain", leader: int) -> SA:
+    def decide_next_action(self, public_blockchain: Blockchain, leader: int) -> SA:
         """Decide the next action for the selfish miner.
 
         Args:
@@ -147,7 +150,7 @@ class SelfishMinerStrategy(SelfishMinerStrategyBase):
         return self.action
 
     def update_private_blockchain(
-        self, public_blockchain: "Blockchain", mining_round: int
+        self, public_blockchain: Blockchain, mining_round: int
     ) -> None:
         """Update the private blockchain of the selfish miner.
 

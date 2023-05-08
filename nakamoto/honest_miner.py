@@ -5,7 +5,9 @@ Author: Jan Jakub Kubik (xkubik32)
 Date: 15.3.2023
 """
 import random
+from typing import Set
 
+from base.blockchain import Blockchain
 from base.miner_base import HonestMinerAction as Action
 from base.miner_base import HonestMinerStrategyBase
 
@@ -17,18 +19,18 @@ class HonestMinerStrategy(HonestMinerStrategyBase):
     def mine_new_block(
         self,
         mining_round: int,
-        public_blockchain: "Blockchain",
+        public_blockchain: Blockchain,
         ongoing_fork: bool,
-        match_competitors: set,
+        match_competitors: Set["HonestMinerStrategyBase"],
         gamma: float,
     ) -> bool:
         """Mine a new block as an honest miner for the Nakamoto consensus.
 
         Args:
             mining_round (int): The current mining round.
-            public_blockchain ('Blockchain'): The public blockchain.
+            public_blockchain (Blockchain): The public blockchain.
             ongoing_fork (bool): Indicates if there is an ongoing fork.
-            match_competitors (set): A set of competing selfish miners.
+            match_competitors (Set[HonestMinerStrategyBase]): A set of competing selfish miners.
             gamma (float): The gamma value for the simulation.
 
         Returns:

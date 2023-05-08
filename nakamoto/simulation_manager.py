@@ -23,6 +23,7 @@ from public_blockchain_functions import (
 
 
 class SimulationManager(SimulationManagerBase):
+    # pylint: disable=too-many-instance-attributes
     """Mediator class for Nakamoto consensus for running whole simulation."""
 
     def __init__(self, simulation_config: dict, blockchain: str):
@@ -40,8 +41,12 @@ class SimulationManager(SimulationManagerBase):
         self.action_store = ActionObjectStore()
         self.ongoing_fork = False
 
+        self.winns = {
+            miner.miner_id: 0 for miner in self.selfish_miners + [self.honest_miner]
+        }
+
     def parse_config(self, simulation_config: dict) -> SimulationConfig:
-        """Parsing dict from yaml config.
+        """Parse dict from yaml config and return an instance of SimulationConfig.
 
         Args:
             simulation_config (dict): A dictionary containing the simulation configuration.
@@ -273,9 +278,6 @@ class SimulationManager(SimulationManagerBase):
 
     def run_simulation(self):
         """Main business logic for running selfish mining simulation."""
-        self.winns = {
-            miner.miner_id: 0 for miner in self.selfish_miners + [self.honest_miner]
-        }
 
         for blocks_mined in range(self.config.simulation_mining_rounds):
             # competitors with match actions
