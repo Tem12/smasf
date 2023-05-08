@@ -1,5 +1,5 @@
-"""Module contains Mediator class which can run
-whole simulation of selfish mining for Subchain consensus.
+"""This module contains the Mediator class, which can run the
+whole simulation of selfish mining for the Subchain consensus.
 
 Author: Jan Jakub Kubik (xkubik32)
 Date: 23.3.2023
@@ -23,9 +23,9 @@ from subchain.weak.selfish_miner import SelfishMinerStrategy
 
 
 class SimulationManager(NakamotoSimulationManager):
-    """Mediator class for Subchain consensus for running whole simulation."""
+    """Mediator class for Subchain consensus for running the whole simulation."""
 
-    def __init__(self, simulation_config: dict, blockchain: str):
+    def __init__(self, simulation_config: dict, blockchain: str) -> None:
         super().__init__(
             simulation_config, blockchain
         )  # create everything necessary from Nakamoto
@@ -42,8 +42,15 @@ class SimulationManager(NakamotoSimulationManager):
 
         self.public_blockchain_strong = Blockchain(owner="public blockchain strong")
 
-    def parse_config(self, simulation_config):
-        """Parsing dict from yaml config."""
+    def parse_config(self, simulation_config: dict) -> SimulationConfig:
+        """Parse the dict from the YAML config.
+
+        Args:
+            simulation_config (dict): The configuration dictionary.
+
+        Returns:
+            SimulationConfig: The parsed configuration object.
+        """
         self.log.info("Subchain parse config method")
 
         sim_config = self.general_config_validations(
@@ -60,8 +67,8 @@ class SimulationManager(NakamotoSimulationManager):
             weak_to_strong_block_ratio=sim_config["weak_to_strong_block_ratio"],
         )
 
-    def run_simulation(self):
-        """Main business logic for running selfish mining simulation."""
+    def run_simulation(self) -> None:
+        """Main business logic for running the selfish mining simulation."""
         self.winns = {
             miner.miner_id: 0 for miner in self.selfish_miners + [self.honest_miner]
         }
@@ -82,7 +89,7 @@ class SimulationManager(NakamotoSimulationManager):
 
                 self.one_round(leader, blocks_mined, is_weak_block=True)
 
-            # Check if it's time to generate a strong block
+                # Check if it's time to generate a strong block
             else:
                 print(f"Strong block generated in round {blocks_mined}")
                 strong_blocks += 1
@@ -120,7 +127,7 @@ class SimulationManager(NakamotoSimulationManager):
                     selfish_miner.blockchain.last_block_id = 0
                     selfish_miner.blockchain.fork_block_id = None
 
-    def run(self):
+    def run(self) -> None:
         self.log.info("Mediator in Subchain WEAK blocks")
 
         self.run_simulation()
