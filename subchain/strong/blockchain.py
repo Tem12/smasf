@@ -1,4 +1,4 @@
-"""Module for class Nakamoto consensus blocks and blockchain.
+"""Module for class Subchain consensus blocks and blockchain.
 
 Author: Jan Jakub Kubik (xkubik32)
 Date: 23.3.2023

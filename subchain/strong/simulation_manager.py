@@ -41,7 +41,7 @@ class SimulationManager(NakamotoSimulationManager):
 
         self.public_blockchain = Blockchain(owner="public blockchain")
 
-    def parse_config(self, simulation_config):
+    def parse_config(self, simulation_config: dict) -> SimulationConfig:
         """Parsing dict from yaml config."""
         self.log.info("Subchain parse config method")
 
@@ -59,24 +59,26 @@ class SimulationManager(NakamotoSimulationManager):
             weak_to_strong_block_ratio=sim_config["weak_to_strong_block_ratio"],
         )
 
-    def resolve_matches_clear(self, winner):
+    def resolve_matches_clear(self, winner: SelfishMinerStrategy) -> None:
         winner.clear_private_strong_chain()
         # clear private weak chain of selfish miner
         self.honest_miner.clear_private_weak_chain()
 
-    def resolve_overrides_clear(self, match_obj):
+    def resolve_overrides_clear(self, match_obj: SelfishMinerStrategy) -> None:
         match_obj.clear_private_strong_chain()
         # need to clear weak blockchain of honest miner
         self.honest_miner.clear_private_weak_chain()
 
-    def add_honest_block(self, round_id, honest_miner, is_weak_block):
+    def add_honest_block(
+        self, round_id: int, honest_miner: HonestMinerStrategy, is_weak_block: bool
+    ) -> None:
         self.public_blockchain.chain.extend(honest_miner.blockchain_weak.chain)
         honest_miner.clear_private_weak_chain()
         super().add_honest_block(round_id, honest_miner, is_weak_block)
 
         self.public_blockchain.last_strong_block_id = len(self.public_blockchain.chain)
 
-    def selfish_override(self, leader):
+    def selfish_override(self, leader: SelfishMinerStrategy) -> None:
         # override public blockchain by attacker's private blockchain
         self.ongoing_fork = False
         self.log.info(
@@ -90,7 +92,7 @@ class SimulationManager(NakamotoSimulationManager):
         # clear just honest miner private weak chain
         self.honest_miner.clear_private_weak_chain()
 
-    def run_simulation(self):
+    def run_simulation(self) -> None:
         """Main business logic for running selfish mining simulation."""
         self.winns = {
             miner.miner_id: 0 for miner in self.selfish_miners + [self.honest_miner]
@@ -137,7 +139,7 @@ class SimulationManager(NakamotoSimulationManager):
             f"Their probability: {(strong_blocks / (weak_blocks + strong_blocks) * 100)}%"
         )
 
-    def run(self):
+    def run(self) -> None:
         self.log.info("Mediator in Subchain STRONG blocks")
 
         self.run_simulation()
