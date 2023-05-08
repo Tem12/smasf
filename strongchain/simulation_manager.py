@@ -60,7 +60,7 @@ class SimulationManager(NakamotoSimulationManager):
             selfish_miners=[
                 sm["mining_power"] for sm in sim_config["miners"]["selfish"]
             ],
-            gamma=sim_config["gamma"],
+            gamma=0,  # this is here because of inherited code from Nakamoto, but it is nowhere used
             simulation_mining_rounds=sim_config["simulation_mining_rounds"],
             weak_to_strong_header_ratio=sim_config["weak_to_strong_header_ratio"],
         )

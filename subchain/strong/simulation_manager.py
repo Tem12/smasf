@@ -46,7 +46,7 @@ class SimulationManager(NakamotoSimulationManager):
         self.log.info("Subchain parse config method")
 
         sim_config = self.general_config_validations(
-            simulation_config, ["weak_to_strong_block_ratio"]
+            simulation_config, ["weak_to_strong_block_ratio", "gamma"]
         )
         return SimulationConfig(
             consensus_name=sim_config["consensus_name"],
