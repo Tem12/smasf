@@ -10,6 +10,5 @@
 #        - mining_power: 15
 #        - mining_power: 15
 #        - mining_power: 15
-    gamma: 0.5
     weak_to_strong_header_ratio: 100
     simulation_mining_rounds: 100_000

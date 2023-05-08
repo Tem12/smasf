@@ -51,7 +51,7 @@ class SimulationManager(SimulationManagerBase):
         """
         self.log.info("Nakamoto parse config method")
 
-        sim_config = self.general_config_validations(simulation_config)
+        sim_config = self.general_config_validations(simulation_config, ["gamma"])
         return SimulationConfig(
             consensus_name=sim_config["consensus_name"],
             honest_miner=sim_config["miners"]["honest"]["mining_power"],
