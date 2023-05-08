@@ -4,7 +4,7 @@ plotting public blockchain after simulation.
 Author: Jan Jakub Kubik (xkubik32)
 Date: 10.4.2023
 """
-from typing import Dict, List
+from typing import Dict, List, Union
 
 import matplotlib.pyplot as plt
 
@@ -86,18 +86,26 @@ def calculate_percentage(block_counts: dict, total_blocks: int) -> dict:
 
 
 def print_attackers_success(
-    block_counts: dict, percentages: dict, winns: dict, attacker_ids: list
+    block_counts: Dict[str, int],
+    percentages: Dict[str, float],
+    winns: Dict[int, Union[int, float]],
+    attacker_ids: List[int],
+    block_counts_same: Dict[str, int] = None,
+    is_strongchain: bool = False,
 ) -> None:
     """
     Print the success information of attackers.
 
     Args:
-        block_counts (dict): A dictionary with miner names as keys and the number of
+        block_counts (Dict[str, int]): A dictionary with miner names as keys and the number of
                              blocks mined as values.
-        percentages (dict): A dictionary with miner names as keys and their corresponding
+        percentages (Dict[str, float]): A dictionary with miner names as keys and their corresponding
                             percentage of blocks mined as values.
-        winns (dict): A dictionary with miner IDs as keys and their corresponding winn values.
-        attacker_ids (list): A list of attacker IDs.
+        winns (Dict[int, Union[int, float]]): A dictionary with miner IDs as keys and their corresponding winn values.
+        attacker_ids (List[int]): A list of attacker IDs.
+        block_counts_same (Dict[str, int]): A dictionary with miner names as keys and the number of
+                             blocks mined as values for the same mining strategy.
+        is_strongchain (bool, optional): A flag to indicate if the mining strategy is strongchain. Defaults to False.
 
     Returns:
         None
@@ -108,22 +116,35 @@ def print_attackers_success(
         print("-------------")
         print(float_with_comma(success))
         print(winns[attacker_id])
-        print(block_counts[attacker_name])
+
+        if is_strongchain:
+            print(block_counts_same[f"{attacker_name} weak"])
+            print(block_counts_same[f"{attacker_name} strong"])
+        else:
+            print(block_counts[attacker_name])
 
 
 def print_honest_miner_info(
-    block_counts: dict, percentages: dict, winns: dict, miner_id: int
+    block_counts: Dict[str, int],
+    percentages: Dict[str, float],
+    winns: Dict[int, Union[int, float]],
+    miner_id: int,
+    block_counts_same: Dict[str, int] = None,
+    is_strongchain: bool = False,
 ) -> None:
     """
     Print the success information of an honest miner.
 
     Args:
-        block_counts (dict): A dictionary with miner names as keys and the number of blocks
+        block_counts (Dict[str, int]): A dictionary with miner names as keys and the number of blocks
                              mined as values.
-        percentages (dict): A dictionary with miner names as keys and their corresponding
+        percentages (Dict[str, float]): A dictionary with miner names as keys and their corresponding
                             percentage of blocks mined as values.
-        winns (dict): A dictionary with miner IDs as keys and their corresponding winn values.
+        winns (Dict[int, Union[int, float]]): A dictionary with miner IDs as keys and their corresponding winn values.
         miner_id (int): The ID of the honest miner.
+        block_counts_same (Dict[str, int]): A dictionary with miner names as keys and the number of
+                             blocks mined as values for the same mining strategy.
+        is_strongchain (bool, optional): A flag to indicate if the mining strategy is strongchain. Defaults to False.
 
     Returns:
         None
@@ -136,4 +157,11 @@ def print_honest_miner_info(
     print("-------------")
     print(float_with_comma(round(success, 3)))
     print(winns[miner_id])
-    print(block_counts[miner_name])
+    print(block_counts_same)
+    print(miner_name)
+
+    if is_strongchain:
+        print(block_counts_same[f"{miner_name} weak"])
+        print(block_counts_same[f"{miner_name} strong"])
+    else:
+        print(block_counts[miner_name])
