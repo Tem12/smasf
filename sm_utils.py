@@ -3,13 +3,18 @@
 Author: Jan Jakub Kubik (xkubik32)
 Date: 13.3.2023
 """
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
+from typing import Dict
 
 import yaml
 
 
-def parse_args():
-    """Parse all program arguments."""
+def parse_args() -> Namespace:
+    """Parse all program arguments.
+
+    Returns:
+        Namespace: Parsed program arguments.
+    """
     parser = ArgumentParser(
         description="Simulate selfish mining on different blockchains."
     )
@@ -37,11 +42,14 @@ def parse_args():
     return parser.parse_args()
 
 
-def load_simulations_config(config_path: str) -> dict:
+def load_simulations_config(config_path: str) -> Dict:
     """Load config from yaml file.
 
-    :param config_path: path to yaml config for loading
-    :return: config: loaded config
+    Args:
+        config_path (str): Path to yaml config for loading.
+
+    Returns:
+        Dict: Loaded config.
     """
     with open(config_path, "r") as file:
         config = yaml.load(file, Loader=yaml.FullLoader)
