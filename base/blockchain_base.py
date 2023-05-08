@@ -16,6 +16,7 @@ class BlockBase(ABC):
         data (str): Data stored in the block.
         miner (Optional[str]): Miner who mined the block.
         miner_id (Optional[int]): Miner's unique identifier.
+        is_weak (bool, optional): Flag indicating if the block is weak. Defaults to False.
     """
 
     data: str
@@ -56,8 +57,17 @@ class BlockchainBase(ABC):
     fork_block_id: Optional[int] = None
 
     @abstractmethod
-    def add_block(self, data: str, miner: str, miner_id: int, is_weak) -> None:
-        """Add newly mined block to the blockchain."""
+    def add_block(
+        self, data: str, miner: str, miner_id: int, is_weak: bool = False
+    ) -> None:
+        """Add newly mined block to the blockchain.
+
+        Args:
+            data (str): Data stored in the block.
+            miner (str): Miner who mined the block.
+            miner_id (int): Miner's unique identifier.
+            is_weak (bool, optional): Flag indicating if the block is weak. Defaults to False.
+        """
         raise NotImplementedError
 
     @abstractmethod
