@@ -129,7 +129,11 @@ def print_honest_miner_info(
         None
     """
     miner_name = f"Honest miner {miner_id}"
-    success = 100 - sum(percentages.values())
+    for name, suc in percentages.items():
+        if "Honest" in name:
+            success = suc
+
+    print("-------------")
     print(float_with_comma(round(success, 3)))
     print(winns[miner_id])
     print(block_counts[miner_name])
