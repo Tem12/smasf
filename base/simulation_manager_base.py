@@ -20,14 +20,14 @@ class ActionObjectStore:
     actions, and clearing the entire store.
 
     Attributes:
-        _store (Dict[Any, List]): A dictionary containing lists of objects keyed by actions.
+        _store (Dict[Any, List[Any]]): A dictionary containing lists of objects keyed by actions.
         _all_actions (List[Any]): A list of all actions in the store.
     """
 
     def __init__(self):
         """Initialize the ActionObjectStore with an empty store and an empty list of actions."""
-        self._store = {}
-        self._all_actions = []
+        self._store: Dict[Any, List[Any]] = {}
+        self._all_actions: List[Any] = []
 
     def add_object(self, action: Any, obj: Any = None) -> None:
         """Add an object associated with the given action to the store.
@@ -87,7 +87,7 @@ class SimulationManagerBase(ABC):
 
     def __init__(self, simulation_config: Dict[str, Any], blockchain: str):
         self.log = create_logger(blockchain)
-        self.config = self.__call_parse_config(simulation_config)
+        self.config: Dict[str, Any] = self.__call_parse_config(simulation_config)
 
     @abstractmethod
     def parse_config(self, simulation_config: Dict[str, Any]) -> Dict[str, Any]:
@@ -130,13 +130,13 @@ class SimulationManagerBase(ABC):
         return random.choices(choices, weights, k=1)[0]
 
     def validate_blockchain_config_keys(
-        self, dictionary: Dict[str, Any], expected_keys: set
+        self, dictionary: Dict[str, Any], expected_keys: Set[str]
     ) -> None:
         """Validate top-level keys in the parsed simulation config.
 
         Args:
             dictionary (Dict[str, Any]): The dictionary to validate.
-            expected_keys (set): The set of expected keys.
+            expected_keys (Set[str]): The set of expected keys.
         """
         self.log.info("validating simulation config")
         dict_keys = set(dictionary.keys())
@@ -149,15 +149,15 @@ class SimulationManagerBase(ABC):
     def general_config_validations(
         self,
         simulation_config: Dict[str, Any],
-        expected_keys_extra: Optional[List] = (),
+        expected_keys_extra: Optional[List[str]] = (),
     ) -> Dict[str, Any]:
         """
         Validates the general configuration of a simulation.
 
         Args:
             simulation_config (Dict[str, Any]): The simulation configuration dictionary.
-            expected_keys_extra (List): The extra expected keys to validate.
-                                        Bu default it is empty list.
+            expected_keys_extra (Optional[List[str]]): The extra expected keys to validate.
+                                                       By default, it is an empty list.
 
         Raises:
             ValueError: If there is not exactly 1 honest miner or no selfish

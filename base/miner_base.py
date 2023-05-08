@@ -35,8 +35,15 @@ class MinerType(Enum):
     SELFISH = 1
 
 
-class MinerStrategyBase:
-    """General base class for all miners."""
+class MinerStrategyBase(ABC):
+    """General base class for all miners.
+
+    Attributes:
+        action (Any): The current action taken by the miner.
+        mining_power (float): The mining power of the miner.
+        miner_id (int): The unique identifier of the miner.
+        log (Any): Logger instance for logging events.
+    """
 
     counter = count(start=42)
 
@@ -56,22 +63,43 @@ class MinerStrategyBase:
         match_competitors: List[int],
         gamma: float,
     ) -> None:
-        """Base method for running the business logic of miner if he mines a new block."""
+        """Base method for running the business logic of miner if he mines a new block.
+
+        Args:
+            mining_round (int): The current mining round.
+            public_blockchain (Any): The public blockchain instance.
+            ongoing_fork (Any): The ongoing fork in the blockchain.
+            match_competitors (List[int]): A list of competitor miners' IDs.
+            gamma (float): The gamma parameter representing the honest miners'
+                           probability of mining on the private chain.
+        """
         raise NotImplementedError
 
     def get_and_reset_action(self) -> Any:
-        """Get action attribute and reset it."""
+        """Get action attribute and reset it.
+
+        Returns:
+            Any: The current action taken by the miner.
+        """
         action = self.action
         self.action = None
         return action
 
     def get_action(self) -> Any:
-        """Get action attribute."""
+        """Get action attribute.
+
+        Returns:
+            Any: The current action taken by the miner.
+        """
         return self.action
 
 
 class HonestMinerStrategyBase(MinerStrategyBase, ABC):
-    """General base class for honest miner."""
+    """General base class for honest miner.
+
+    Attributes:
+        miner_type (MinerType): The type of the miner.
+    """
 
     def __init__(self, mining_power: float):
         super().__init__(mining_power)
@@ -79,18 +107,34 @@ class HonestMinerStrategyBase(MinerStrategyBase, ABC):
 
 
 class SelfishMinerStrategyBase(MinerStrategyBase, ABC):
-    """General base class for selfish miner."""
+    """General base class for selfish miner.
+
+    Attributes:
+        miner_type (MinerType): The type of the miner.
+    """
 
     def __init__(self, mining_power: float):
         super().__init__(mining_power)
         self.miner_type = MinerType.SELFISH
 
+    @abstractmethod
     def decide_next_action(self, public_blockchain: Any, leader: int) -> None:
-        """Base selfish miner method for setting up the action after public blockchain update."""
+        """Base selfish miner method for setting up the action after public blockchain update.
+
+        Args:
+            public_blockchain (Any): The public blockchain instance.
+            leader (int): The unique identifier of the current leader miner.
+        """
         raise NotImplementedError
 
+    @abstractmethod
     def update_private_blockchain(
         self, public_blockchain: Any, mining_round: int
     ) -> None:
-        """Base selfish miner method for updating his private blockchain."""
+        """Base selfish miner method for updating his private blockchain.
+
+        Args:
+            public_blockchain (Any): The public blockchain instance.
+            mining_round (int): The current mining round.
+        """
         raise NotImplementedError
