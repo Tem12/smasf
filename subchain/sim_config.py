@@ -1,5 +1,5 @@
-"""Module contains dataclass for parsed simulation config,
-which is specific for Subchain blockchain.
+"""Module containing the dataclass for parsed simulation config,
+which is specific to the Subchain blockchain.
 
 Author: Jan Jakub Kubik (xkubik32)
 Date: 23.3.2023
@@ -13,7 +13,7 @@ from base.sim_config_base import SimulationConfigBase
 class SimulationConfig(SimulationConfigBase):
     """Dataclass for Subchain simulation config.
 
-    All default attributes for simulation are defined in `SimulationConfigBase` class.
+    All default attributes for simulation are defined in the `SimulationConfigBase` class.
 
     Attributes:
         weak_to_strong_block_ratio (int): The ratio of weak to strong blocks.
