@@ -1,5 +1,5 @@
-"""Module contains Mediator class which can run
-whole simulation of selfish mining for Strongchain consensus.
+"""Module containing the Mediator class for running the entire
+selfish mining simulation for the Strongchain consensus.
 
 Author: Jan Jakub Kubik (xkubik32)
 Date: 14.3.2023
@@ -22,7 +22,9 @@ from strongchain.sim_config import SimulationConfig
 
 
 class SimulationManager(NakamotoSimulationManager):
-    """Mediator class for Strongchain consensus for running whole simulation."""
+    # pylint: disable=too-many-instance-attributes
+    """Mediator class for running the entire selfish mining simulation
+    for the Strongchain consensus."""
 
     def __init__(self, simulation_config: dict, blockchain: str):
         super().__init__(
@@ -47,8 +49,19 @@ class SimulationManager(NakamotoSimulationManager):
             weak_to_strong_header_ratio=self.config.weak_to_strong_header_ratio,
         )
 
+        self.winns = {
+            miner.miner_id: 0 for miner in self.selfish_miners + [self.honest_miner]
+        }
+
+        self.strong = {
+            miner.miner_id: 0 for miner in self.selfish_miners + [self.honest_miner]
+        }
+        self.weak = {
+            miner.miner_id: 0 for miner in self.selfish_miners + [self.honest_miner]
+        }
+
     def parse_config(self, simulation_config):
-        """Parsing dict from yaml config."""
+        """Parse dict from YAML config."""
         self.log.info("Strongchain parse config method")
 
         sim_config = self.general_config_validations(
@@ -144,16 +157,6 @@ class SimulationManager(NakamotoSimulationManager):
 
     def run_simulation(self):
         """Main business logic for running selfish mining simulation."""
-        self.winns = {
-            miner.miner_id: 0 for miner in self.selfish_miners + [self.honest_miner]
-        }
-
-        self.strong = {
-            miner.miner_id: 0 for miner in self.selfish_miners + [self.honest_miner]
-        }
-        self.weak = {
-            miner.miner_id: 0 for miner in self.selfish_miners + [self.honest_miner]
-        }
 
         total_headers = self.config.weak_to_strong_header_ratio + 1
         weak_header_probability = (
