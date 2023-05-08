@@ -170,7 +170,6 @@ class SimulationManagerBase(ABC):
         expected_keys: Set[str] = {
             "consensus_name",
             "miners",
-            "gamma",
             "simulation_mining_rounds",
         }
         for key in expected_keys_extra:
