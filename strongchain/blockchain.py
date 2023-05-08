@@ -1,4 +1,4 @@
-"""Module for class Strongchain consensus blocks and blockchain.
+"""Module containing the Strongchain consensus blocks and blockchain classes.
 
 Author: Jan Jakub Kubik (xkubik32)
 Date: 02.04.2023
@@ -14,12 +14,12 @@ from base.blockchain import Blockchain as NakamotoBlockchain
 class WeakHeader(NakamotoBlock):
     """WeakHeader class for Strongchain consensus blocks."""
 
-    # remove unwanted attribute from parent class
+    # Remove unwanted attribute from parent class
     is_weak: None = None
 
     def __repr__(self) -> str:
         return (
-            f"Weak header(data={self.data}, miner={self.miner}, "
+            f"WeakHeader(data={self.data}, miner={self.miner}, "
             f"miner_id={self.miner_id})"
         )
 
@@ -42,8 +42,8 @@ class Block(NakamotoBlock):
 
     weak_headers: List = field(default_factory=list)
 
-    def setup_weak_headers(self, weak_headers):
-        """Setup weak headers."""
+    def setup_weak_headers(self, weak_headers: List[WeakHeader]) -> None:
+        """Add a list of weak headers to the current block."""
         self.weak_headers.extend(weak_headers)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -66,7 +66,7 @@ class Block(NakamotoBlock):
 class Blockchain(NakamotoBlockchain):
     """Blockchain class for Strongchain consensus."""
 
-    # must have some default value which is always overridden
+    # Must have some default value which is always overridden
     weak_to_strong_header_ratio: int = 42
 
     def add_block(
@@ -76,26 +76,26 @@ class Blockchain(NakamotoBlockchain):
         self.chain.append(new_block)
         self.last_block_id += 1
 
-    def chains_pow(self):
-        """Compute whole blockchain power."""
+    def chains_pow(self) -> float:
+        """Compute the total power of the whole blockchain."""
         return self.chains_pow_from_index(index=0)
 
-    def chains_pow_from_index(self, index):
-        """Compute blockchain power from index."""
+    def chains_pow_from_index(self, index: int) -> float:
+        """Compute the power of the blockchain from a given index."""
         chains_pow = 0
         for block in self.chain[index:]:
-            # strong block pow = 1
+            # Strong block pow = 1
             chains_pow += 1
             for _ in block.weak_headers:
-                # weak header pow = 1 / weak_to_strong_header_ratio
+                # Weak header pow = 1 / weak_to_strong_header_ratio
                 chains_pow = chains_pow + (1 / self.weak_to_strong_header_ratio)
 
         return chains_pow
 
     def override_chain(self, attacker) -> None:
-        """Override last N blocks with private chain."""
+        """Replace the last N blocks with the attacker's private chain."""
 
-        # handle edge case when the first mined block is by selfish miner
-        # seems to be working
+        # Handle edge case when the first mined block is by selfish miner
+        # This seems to be working
         self.chain[attacker.blockchain.fork_block_id :] = []
         self.chain.extend(attacker.blockchain.chain)
