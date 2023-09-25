@@ -45,7 +45,7 @@ class MinerStrategyBase(ABC):
         log (Any): Logger instance for logging events.
     """
 
-    counter = count(start=42)
+    counter = count(start=1)
 
     def __init__(self, mining_power: float):
         self.action = None

@@ -1,14 +1,20 @@
 # whole simulation config
 - simulation1:
     consensus_name: Nakamoto
+    # miners:
+    #   honest:
+    #     mining_power: 56
+    #   selfish:
+    #     - mining_power: 44
+    #     # - mining_power: 22
     miners:
       honest:
-        mining_power: 56
+        mining_power: 60
       selfish:
-        - mining_power: 22
-        - mining_power: 22
+        - mining_power: 20
+        - mining_power: 20
     gamma: 0.5
-    simulation_mining_rounds: 200_000
+    simulation_mining_rounds: 100_000
 
 #- simulation2:
 #    consensus_name: Nakamoto

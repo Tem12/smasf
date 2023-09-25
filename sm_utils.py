@@ -39,6 +39,9 @@ def parse_args() -> Namespace:
     # Create the parser for the third choice
     subparsers.add_parser("strongchain", help="Strongchain blockchain simulation")
 
+    # Create the parser for the 4th choice
+    subparsers.add_parser("fruitchain", help="Fruitchain blockchain simulation")
+
     return parser.parse_args()
 
 
