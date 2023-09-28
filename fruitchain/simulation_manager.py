@@ -54,6 +54,8 @@ class SimulationManager(NakamotoSimulationManager):
             miner.miner_id: 0 for miner in self.selfish_miners + [self.honest_miner]
         }
 
+        self.ongoing_fork_counter = 0
+
     def parse_config(self, simulation_config: dict) -> SimulationConfig:
         """Parse dict from YAML config."""
         self.log.info("Fruitchain parse config method")
@@ -87,25 +89,67 @@ class SimulationManager(NakamotoSimulationManager):
             leader = None
             if self.ongoing_fork and action == FruitchainAction.MINE_BLOCK:
                 # leader selection based on fruit quantity
-                highest_fruit_count = -1
+                # highest_fruit_count = -1
 
                 # get leading competitors
-                highest_blockchain_size = -1
-                competitors = []
-                for miner in self.miners:
-                    if miner.miner_type == MinerType.SELFISH and miner.blockchain.size() >= highest_blockchain_size:
-                            competitors.append(miner)
-                            highest_blockchain_size = miner.blockchain.size()
-                    elif miner.miner_type == MinerType.HONEST and self.public_blockchain.size() >= highest_blockchain_size:
-                        competitors.append(miner)
-                        highest_blockchain_size = self.public_blockchain.size()
+                # highest_blockchain_size = -1
+                # competitors = []
+                # for miner in self.miners:
+                #     if miner.miner_type == MinerType.SELFISH and miner.blockchain.size() >= highest_blockchain_size:
+                #             competitors.append(miner)
+                #             highest_blockchain_size = miner.blockchain.size()
+                #     elif miner.miner_type == MinerType.HONEST and self.public_blockchain.size() >= highest_blockchain_size:
+                #         competitors.append(miner)
+                #         highest_blockchain_size = self.public_blockchain.size()
+
+                # Find the maximum fruit count using the custom key function
+                max_fruit_count = max(self.miners, key=lambda miner: miner.get_fruit_count()).get_fruit_count()
+
+                # Filter miners with the maximum fruit count
+                max_fruit_miners = [miner for miner in self.miners if miner.get_fruit_count() == max_fruit_count]
+
+                # Randomly select one miner from the list of miners with the maximum fruit count
+                if self.config.gamma == 0.5:
+                    leader = random.choice(max_fruit_miners)
+                elif self.config.gamma == 0.0:
+                    contains_honest = False
+                    for miner in max_fruit_miners:
+                        if miner.miner_type == MinerType.HONEST:
+                            contains_honest = True
+                            break
+                    
+                    if contains_honest:
+                        honest_miners = [miner for miner in max_fruit_miners if miner.miner_type == MinerType.HONEST]
+                        leader = random.choice(honest_miners)
+                    else:
+                        leader = random.choice(max_fruit_miners)
+                elif self.config.gamma == 1.0:
+                    contains_selfish = False
+                    for miner in max_fruit_miners:
+                        if miner.miner_type == MinerType.SELFISH:
+                            contains_selfish = True
+                            break
+                    
+                    if contains_selfish:
+                        selfish_miners = [miner for miner in max_fruit_miners if miner.miner_type == MinerType.SELFISH]
+                        leader = random.choice(selfish_miners)
+                    else:
+                        leader = random.choice(max_fruit_miners)
+                
                         
-                for miner in competitors:
-                    fruit_count = miner.get_fruit_count()
-                    if fruit_count >= highest_fruit_count:
-                        if leader is None or miner.miner_type == MinerType.SELFISH:
-                            # higher chance for selfish if their fruit content count equals
-                            leader = miner
+                # else:
+                #     for miner in competitors:
+                #         fruit_count = miner.get_fruit_count()
+                #         if fruit_count >= highest_fruit_count:
+                #             if self.config.gamma == 1.0:
+                #                 if leader is None or miner.miner_type == MinerType.SELFISH:
+                #                     # higher chance for selfish if their fruit content count equals
+                #                     leader = miner
+                #                     exit(1)
+                #             elif self.config.gamma == 0.0:
+                #                 if leader is None or miner.miner_type == MinerType.HONEST:
+                #                     # higher chance for selfish if their fruit content count equals
+                #                     leader = miner                                    
             else:
                 leader = self.choose_leader(self.miners, self.miners_info)
             
@@ -143,7 +187,7 @@ class SimulationManager(NakamotoSimulationManager):
             self.action_store.remove_object(SA.MATCH, attacker)
 
     def one_round(self, leader, round_id, mining_action):
-        """One round of simulation, where is one new block mined."""
+        """One round of simulation, where is one new block mined."""        
         if mining_action == FruitchainAction.MINE_FRUIT:
             # mine fruit
             leader.mine_new_fruit()
@@ -161,6 +205,9 @@ class SimulationManager(NakamotoSimulationManager):
                 match_competitors=self.action_store.get_objects(SA.MATCH),
                 gamma=self.config.gamma,
             )
+
+            if self.ongoing_fork:
+                self.ongoing_fork_counter += 1
 
             # action = leader.get_and_reset_action()
             action = leader.get_action()
@@ -311,6 +358,8 @@ class SimulationManager(NakamotoSimulationManager):
         writer.writerow(['miner_id', 'fruits'])
         for block in self.public_blockchain:
             writer.writerow([block.miner_id, block.data])
+
+        print(f'Forks: {self.ongoing_fork_counter}')
 
         # print(block_counts)
         # import json
