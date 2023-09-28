@@ -161,13 +161,13 @@ class SelfishMinerStrategy(SelfishMinerStrategyBase):
         if self.blockchain.size() == 0:
             self.blockchain.initialize(public_blockchain.last_block_id)
             self.blockchain.add_block(
-                f"Block {mining_round} data",
+                f"Xya",
                 f"Selfish miner {self.miner_id}",
                 self.miner_id,
             )
         else:
             self.blockchain.add_block(
-                f"Block {mining_round} data",
+                f"cca",
                 f"Selfish miner {self.miner_id}",
                 self.miner_id,
             )

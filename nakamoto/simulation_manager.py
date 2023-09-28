@@ -176,7 +176,7 @@ class SimulationManager(SimulationManagerBase):
             is_weak_block (bool): Indicates if the block is a weak block or not.
         """
         self.public_blockchain.add_block(
-            data=f"Block {round_id} data",
+            data=f"vvvba",
             miner=f"Honest miner {honest_miner.miner_id}",
             miner_id=honest_miner.miner_id,
             is_weak=is_weak_block,

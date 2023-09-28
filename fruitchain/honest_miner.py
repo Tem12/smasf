@@ -13,32 +13,30 @@ from base.miner_base import HonestMinerStrategyBase
 
 from nakamoto.honest_miner import HonestMinerStrategy as NakamotoHonestMinerStrategy
 
+import json
+
 
 class HonestMinerStrategy(NakamotoHonestMinerStrategy):
     """Honest miner class implementation for Fruitchain consensus."""
 
     def __init__(self, mining_power: int):
         super().__init__(mining_power)
-        self.fruit_queue_count = 0
-        self.rewarded_fruit = 0  # Rewarded only when mined fruit included in their mined block
+        self.fruit_queue = []
 
     def mine_new_fruit(self):
-        self.fruit_queue_count += 1
+        self.fruit_queue.append(self.miner_id)
 
-    def receive_new_fruit(self):
-        self.fruit_queue_count += 1
+    def receive_new_fruit(self, miner_id):
+        self.fruit_queue.append(miner_id)
 
     def clear_fruit_queue(self):
-        self.fruit_queue_count = 0
-
-    def store_fruit_reward(self):
-        self.rewarded_fruit += self.fruit_queue_count
-
-    def get_mined_fruit_count(self):
-        return self.rewarded_fruit
+        self.fruit_queue.clear()
 
     def get_fruit_count(self):
-        return self.fruit_queue_count
+        return self.fruit_queue.count(self.miner_id)
+
+    def fruit_to_str(self):
+        return json.dumps(self.fruit_queue)
     
         # pylint: disable=too-many-arguments
     def mine_new_block(

@@ -13,34 +13,32 @@ from base.miner_base import SelfishMinerStrategyBase
 
 from nakamoto.selfish_miner import SelfishMinerStrategy as NakamotoSelfishMinerStrategy
 
+import json
+
 
 class SelfishMinerStrategy(NakamotoSelfishMinerStrategy):
     """Selfish miner class implementation for Fruitchain consensus."""
 
     def __init__(self, mining_power: int):
         super().__init__(mining_power)
-        self.fruit_queue_count = 0
-        self.private_queue_count = 0
-        self.rewarded_fruit = 0    # Rewarded only when mined fruit included in their mined block
+        self.fruit_queue = []
+        self.private_queue = []
 
     def mine_new_fruit(self):
-        self.private_queue_count += 1
+        self.private_queue.append(self.miner_id)
 
-    def receive_new_fruit(self):
-        self.fruit_queue_count += 1
+    def receive_new_fruit(self, miner_id):
+        self.fruit_queue.append(miner_id)
     
     def clear_fruit_queue(self):
-        self.fruit_queue_count = 0
-        self.private_queue_count = 0
-
-    def store_fruit_reward(self):
-        self.rewarded_fruit += self.fruit_queue_count + self.private_queue_count
-
-    def get_mined_fruit_count(self):
-        return self.rewarded_fruit
+        self.fruit_queue.clear()
+        self.private_queue.clear()
 
     def get_fruit_count(self):
-        return self.fruit_queue_count + self.private_queue_count
+        return self.fruit_queue.count(self.miner_id) + self.private_queue.count(self.miner_id)
+
+    def fruit_to_str(self):
+        return json.dumps(self.fruit_queue + self.private_queue)
     
     # pylint: disable=too-many-arguments
     def mine_new_block(
@@ -114,3 +112,27 @@ class SelfishMinerStrategy(NakamotoSelfishMinerStrategy):
             self.action = SA.WAIT
 
         return ongoing_fork
+
+    def update_private_blockchain(
+        self, public_blockchain: Blockchain, mining_round: int
+    ) -> None:
+        """Update the private blockchain of the selfish miner.
+
+        Args:
+            public_blockchain (Blockchain): The public blockchain.
+            mining_round (int): The current mining round.
+        """
+        fruits = self.fruit_to_str()
+        if self.blockchain.size() == 0:
+            self.blockchain.initialize(public_blockchain.last_block_id)
+            self.blockchain.add_block(
+                fruits,
+                f"Selfish miner {self.miner_id}",
+                self.miner_id,
+            )
+        else:
+            self.blockchain.add_block(
+                fruits,
+                f"Selfish miner {self.miner_id}",
+                self.miner_id,
+            )

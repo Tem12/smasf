@@ -23,6 +23,8 @@ from public_blockchain_functions import (
 from fruitchain.sim_config import SimulationConfig
 from fruitchain.fruitchain_types import FruitchainAction
 
+import csv
+
 
 class SimulationManager(NakamotoSimulationManager):
     # pylint: disable=too-many-instance-attributes
@@ -116,6 +118,30 @@ class SimulationManager(NakamotoSimulationManager):
         self.log.info(self.config.simulation_mining_rounds)
         self.log.info(self.winns)
 
+    def add_honest_block(
+        self, round_id: int, honest_miner: HonestMinerStrategy, is_weak_block: bool
+    ) -> None:
+        """Add honest block to public blockchain.
+
+        Args:
+            round_id (int): The current round ID.
+            honest_miner (HonestMinerStrategy): The honest miner who mined the block.
+            is_weak_block (bool): Indicates if the block is a weak block or not.
+        """
+        fruits = honest_miner.fruit_to_str()
+        self.public_blockchain.add_block(
+            data=fruits,
+            miner=f"Honest miner {honest_miner.miner_id}",
+            miner_id=honest_miner.miner_id,
+            is_weak=is_weak_block,
+        )
+
+        # clearing of private chains of all attackers which are currently in MATCH
+        match_objects = self.action_store.get_objects(SA.MATCH)
+        for attacker in match_objects:
+            attacker.clear_private_chain()
+            self.action_store.remove_object(SA.MATCH, attacker)
+
     def one_round(self, leader, round_id, mining_action):
         """One round of simulation, where is one new block mined."""
         if mining_action == FruitchainAction.MINE_FRUIT:
@@ -123,8 +149,8 @@ class SimulationManager(NakamotoSimulationManager):
             leader.mine_new_fruit()
 
             for miner in self.miners:
-                if miner is not leader:
-                    miner.receive_new_fruit()
+                if miner.miner_id != leader.miner_id:
+                    miner.receive_new_fruit(leader.miner_id)
 
         elif mining_action == FruitchainAction.MINE_BLOCK:
             # mine block/superblock
@@ -190,9 +216,6 @@ class SimulationManager(NakamotoSimulationManager):
 
             if SA.MATCH in all_actions:
                 self.resolve_matches()
-
-            # Store leader reward
-            leader.store_fruit_reward()
 
             # If block was mined by honest miner, clear fruit-queues for all miners
             if leader.miner_type == MinerType.HONEST:
@@ -265,10 +288,6 @@ class SimulationManager(NakamotoSimulationManager):
 
         self.run_simulation()
 
-        print('Fruit rewards:')
-        for miner in self.miners:
-            print(f'{miner.miner_type} - {miner.get_mined_fruit_count()}')
-
         block_counts = {f"Honest miner {self.honest_miner.miner_id}": 0}
         for miner in self.selfish_miners:
             block_counts.update({f"Selfish miner {miner.miner_id}": 0})
@@ -286,6 +305,13 @@ class SimulationManager(NakamotoSimulationManager):
         print_attackers_success(block_counts, percentages, self.winns, attacker_ids)
         print_honest_miner_info(block_counts, percentages, self.winns, honest_miner_id)
 
+        # Store results
+        f = open('fruit_res.csv', 'w')
+        writer = csv.writer(f)
+        writer.writerow(['miner_id', 'fruits'])
+        for block in self.public_blockchain:
+            writer.writerow([block.miner_id, block.data])
+
         # print(block_counts)
         # import json
         # visualize whole blockchain
@@ -293,4 +319,4 @@ class SimulationManager(NakamotoSimulationManager):
         # self.log.info(block_counts)
         # self.log.info(self.selfish_miners[0].blockchain.chain)
 
-        plot_block_counts(block_counts, self.miners_info)
+        # plot_block_counts(block_counts, self.miners_info)
