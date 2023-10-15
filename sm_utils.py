@@ -42,6 +42,8 @@ def parse_args() -> Namespace:
     # Create the parser for the 4th choice
     subparsers.add_parser("fruitchain", help="Fruitchain blockchain simulation")
 
+    parser.add_argument("--out", type=str, required=False, help="Output file path")
+
     return parser.parse_args()
 
 

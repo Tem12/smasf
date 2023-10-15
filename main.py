@@ -39,7 +39,7 @@ def main() -> None:
     run_simulations(args)
     log = create_logger("main")
     log.info("logging")
-    print(log)
+    # print(log)
 
 
 if __name__ == "__main__":

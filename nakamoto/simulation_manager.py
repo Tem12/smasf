@@ -136,7 +136,7 @@ class SimulationManager(SimulationManagerBase):
 
     def resolve_overrides(self) -> None:
         """Resolve any overrides that need to occur after mining."""
-        self.log.info("resolve_overrides")
+        # self.log.info("resolve_overrides")
 
         match_attackers = self.action_store.get_objects(SA.OVERRIDE)
         if len(match_attackers) == 1:
@@ -195,10 +195,10 @@ class SimulationManager(SimulationManagerBase):
             leader (SelfishMinerStrategy): The selfish miner with the longest chain.
         """
         self.ongoing_fork = False
-        self.log.info(
-            f"Override by attacker {leader.blockchain.fork_block_id},"
-            f" {leader.miner_id} in fork"
-        )
+        # self.log.info(
+        #     f"Override by attacker {leader.blockchain.fork_block_id},"
+        #     f" {leader.miner_id} in fork"
+        # )
         self.public_blockchain.override_chain(leader)
         # It is necessary to increase last block id on honest chain after override
         # which happens only if SM wins the block and he is in ongoing fork
