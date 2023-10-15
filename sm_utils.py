@@ -40,7 +40,13 @@ def parse_args() -> Namespace:
     subparsers.add_parser("strongchain", help="Strongchain blockchain simulation")
 
     # Create the parser for the 4th choice
-    subparsers.add_parser("fruitchain", help="Fruitchain blockchain simulation")
+    fruitchain = subparsers.add_parser(
+        "fruitchain", help="Fruitchain blockchain simulation"
+    )
+
+    fruitchain.add_argument(
+        "--config", type=str, required=False, help="Config file"
+    )
 
     parser.add_argument("--out", type=str, required=False, help="Output file path")
 

@@ -24,8 +24,11 @@ def run_simulations(parsed_args: Namespace) -> None:
     else:
         module_path = config_path = parsed_args.blockchain
 
+    print(parsed_args.config)
+
     mediator_module = importlib.import_module(module_path + "." + "simulation_manager")
-    simulations_config = load_simulations_config(config_path + "/" + "config.yaml")
+    # simulations_config = load_simulations_config(config_path + "/" + "config.yaml")
+    simulations_config = load_simulations_config(parsed_args.config)
     for simulation_config in simulations_config:
         sim_manager = mediator_module.SimulationManager(
             simulation_config=simulation_config, blockchain=parsed_args

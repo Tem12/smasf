@@ -1,0 +1,11 @@
+- simulation1:
+    consensus_name: Fruitchain
+    miners:
+      honest:
+        mining_power: 65
+      selfish:
+        - mining_power: 35
+    gamma: 0.0
+    simulation_mining_rounds: 200_000
+    fruit_mine_prob: 0.8
+    superblock_prob: 0.2
