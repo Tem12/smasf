@@ -2,10 +2,10 @@
     consensus_name: Fruitchain
     miners:
       honest:
-        mining_power: 58
+        mining_power: 30
       selfish:
-        - mining_power: 42
-        # - mining_power: 25
+        - mining_power: 35
+        - mining_power: 35
     gamma: 0.5
     simulation_mining_rounds: 50_000
     # fruit_mine_prob: 0.9900990099009901

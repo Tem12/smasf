@@ -14,7 +14,7 @@ import yaml
 MAX_INSTANCES = 2
 
 # How many times should be simulations repeated with same configuration
-EXPERIMENT_REPEAT = 1
+EXPERIMENT_REPEAT = 10
 
 # Gamma settings for all simulation, must be same
 GAMMA = 0.0
@@ -23,7 +23,7 @@ MINING_ROUNDS = 500
 
 # Selfish miners power
 num_of_cfgs = (
-    40 // 5
+    3
 )  # Optional variable, can be removed and specified directly in np.linespace
 SELFISH_MINERS = [
     np.linspace(
@@ -46,8 +46,8 @@ SELFISH_MINERS = [
 # Honest miner is added automatically
 
 # ----- Fruitchain settings -----
-FRUIT_MINE_PROB = 0.9090909090909091
-SUPERBLOCK_MINE_PROB = 0.09090909090909091
+FRUIT_MINE_PROB = 0.9
+SUPERBLOCK_MINE_PROB = 0.1
 
 # ----- Strongchain settings -----
 WEAK_TO_STRONG_HEADER_RATIO = 100
@@ -90,7 +90,7 @@ def main():
     simulations = None
 
     if args.blockchain == "fruitchain":
-        simulations = create_fruitchain_simulation_queue()
+        simulations, res_count_simulations = create_fruitchain_simulation_queue()
     elif args.blockchain == "strongchain":
         simulations = create_strongchain_simulation_queue()
     
@@ -106,6 +106,16 @@ def main():
             sim = simulations.pop(0)
             future = executor.submit(run_simulation, sim)
             future.add_done_callback(log_finished_simulation)
+
+    if (args.blockchain == "fruitchain"):
+        total_simulations += len(res_count_simulations)
+        print('Post process part started...')
+        # Start simulations on separate CPUs
+        with ProcessPoolExecutor(max_workers=MAX_INSTANCES) as executor:
+            while len(res_count_simulations) > 0:
+                sim = res_count_simulations.pop(0)
+                future = executor.submit(run_simulation, sim)
+                future.add_done_callback(log_finished_simulation)
 
 
 def create_miners_settings():
@@ -138,6 +148,7 @@ def create_miners_settings():
 
 def create_fruitchain_simulation_queue():
     simulations = []
+    res_count_simulations = []
 
     all_selfish_mining_power, honest_mining_power = create_miners_settings()
 
@@ -163,7 +174,7 @@ def create_fruitchain_simulation_queue():
             }
         ]
 
-        with open(f"tmp/fruitchain_cfg_{config_unique_prefix}_{i}.yaml", "w") as file:
+        with open(f"/tmp/fruitchain_cfg_{config_unique_prefix}_{i}.yaml", "w") as file:
             yaml.dump(fruit_yaml, file)
 
     run_base = [f"python3", "main.py"]
@@ -178,22 +189,24 @@ def create_fruitchain_simulation_queue():
                     f"{program_args.out}_{i}_{experiment_i}.out",
                     "fruitchain",
                     "--config",
-                    f"tmp/fruitchain_cfg_{config_unique_prefix}_{i}.yaml",
+                    f"/tmp/fruitchain_cfg_{config_unique_prefix}_{i}.yaml",
                 ]
             )
 
         for i in range(0, len(all_selfish_mining_power)):
-            simulations.append(
+            res_count_simulations.append(
                 res_count_base
                 + [
                     "--input",
                     f"{program_args.out}_{i}_{experiment_i}.out",
                     "--tag",
-                    f"{program_args.out}_{i}",
+                    f"{program_args.out}_{i}_{experiment_i}",
+                    "--block_reward",
+                    f"{int(SUPERBLOCK_MINE_PROB / (FRUIT_MINE_PROB + SUPERBLOCK_MINE_PROB) * 100)}"
                 ]
             )
 
-    return simulations
+    return simulations, res_count_simulations
 
 def create_strongchain_simulation_queue():
     simulations = []
@@ -221,7 +234,7 @@ def create_strongchain_simulation_queue():
             }
         ]
 
-        with open(f"tmp/strongchain_cfg_{config_unique_prefix}_{i}.yaml", "w") as file:
+        with open(f"/tmp/strongchain_cfg_{config_unique_prefix}_{i}.yaml", "w") as file:
             yaml.dump(fruit_yaml, file)
 
     run_base = [f"python3", "main.py"]
@@ -235,7 +248,7 @@ def create_strongchain_simulation_queue():
                     f"{program_args.out}_{i}_{experiment_i}.out",
                     "strongchain",
                     "--config",
-                    f"tmp/strongchain_cfg_{config_unique_prefix}_{i}.yaml",
+                    f"/tmp/strongchain_cfg_{config_unique_prefix}_{i}.yaml",
                 ]
             )
 

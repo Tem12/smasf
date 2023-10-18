@@ -57,7 +57,7 @@ class Blockchain(BlockchainBase):
             fork_block_id (int): The block ID where the fork occurred.
         """
         self.fork_block_id = fork_block_id
-        print(f"fork block id: {self.fork_block_id}")
+        # print(f"fork block id: {self.fork_block_id}")
 
     def __iter__(self) -> Iterator:
         return iter(self.chain)

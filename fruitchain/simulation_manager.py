@@ -163,8 +163,11 @@ class SimulationManager(NakamotoSimulationManager):
 
                 if action == FruitchainAction.MINE_BLOCK:
                     self.winns[leader.miner_id] += 1
-                    blocks_mined += 1
-                    pbar.update(1)
+                    
+                    curr_blocks_mined = len(self.get_max_chain().chain)
+                    blocks_mined = curr_blocks_mined
+                    pbar.n = blocks_mined
+                    pbar.refresh()
 
         # self.log.info(self.config.simulation_mining_rounds)
         # self.log.info(self.winns)
@@ -336,6 +339,18 @@ class SimulationManager(NakamotoSimulationManager):
         weights = (self.config.fruit_mine_prob,
                    self.config.superblock_prob)
         return random.choices(choices_list, weights=weights, k=1)[0]
+    
+    def get_max_chain(self):
+        max_chain = self.public_blockchain
+        curr_max = len(self.public_blockchain.chain)
+
+        for miner in self.miners:
+            if miner.miner_type == MinerType.SELFISH:
+                if len(miner.blockchain.chain) >= curr_max:
+                    max_chain = miner.blockchain
+                    curr_max = len(miner.blockchain.chain)
+
+        return max_chain
 
     def run(self):
         """This method is entry point for running all checks for specific provider monitor."""
@@ -344,6 +359,15 @@ class SimulationManager(NakamotoSimulationManager):
         # print(self.config)
 
         self.run_simulation()
+
+        # Flush blockchain
+        # curr_max = len(self.public_blockchain.chain)
+        # for miner in self.miners:
+        #     if miner.miner_type == MinerType.SELFISH:
+        #         if len(miner.blockchain.chain) >= curr_max:
+        #             self.public_blockchain = miner.blockchain
+        #             curr_max = len(miner.blockchain.chain)
+        self.public_blockchain = self.get_max_chain()
 
         block_counts = {f"Honest miner {self.honest_miner.miner_id}": 0}
         for miner in self.selfish_miners:
@@ -368,6 +392,12 @@ class SimulationManager(NakamotoSimulationManager):
         writer.writerow(['miner_id', 'fruits'])
         for block in self.public_blockchain:
             writer.writerow([block.miner_id, block.data])
+
+        print('Final chains:')
+        print(f'{honest_miner_id}: {len(self.public_blockchain.chain)}')
+        for miner in self.miners:
+            if miner.miner_type == MinerType.SELFISH:
+                print(f'{miner.miner_id}: {len(miner.blockchain.chain)}')
 
         # print(f'Forks: {self.ongoing_fork_counter}')
 

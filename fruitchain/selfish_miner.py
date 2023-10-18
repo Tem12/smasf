@@ -15,6 +15,8 @@ from nakamoto.selfish_miner import SelfishMinerStrategy as NakamotoSelfishMinerS
 
 import json
 
+BLOCK_REWARD = 10
+
 
 class SelfishMinerStrategy(NakamotoSelfishMinerStrategy):
     """Selfish miner class implementation for Fruitchain consensus."""
@@ -29,6 +31,7 @@ class SelfishMinerStrategy(NakamotoSelfishMinerStrategy):
 
     def receive_new_fruit(self, miner_id):
         self.fruit_queue.append(miner_id)
+        # pass
     
     def clear_fruit_queue(self):
         self.fruit_queue.clear()
@@ -36,6 +39,7 @@ class SelfishMinerStrategy(NakamotoSelfishMinerStrategy):
 
     def get_fruit_count(self):
         return self.fruit_queue.count(self.miner_id) + self.private_queue.count(self.miner_id)
+        # return self.private_queue.count(self.miner_id)
 
     def fruit_to_str(self):
         return json.dumps(self.fruit_queue + self.private_queue)
@@ -62,16 +66,25 @@ class SelfishMinerStrategy(NakamotoSelfishMinerStrategy):
         Returns:
             bool: Whether the fork is ongoing after the block is mined.
         """
-        self.log.info(
-            f"Selfish miner: {self.miner_id} is leader of round: {mining_round}"
-        )
+        # self.log.info(
+        #     f"Selfish miner: {self.miner_id} is leader of round: {mining_round}"
+        # )
         self.update_private_blockchain(public_blockchain, mining_round)
 
         if ongoing_fork:
             first_competitor = list(match_competitors)[0]
-            print('Selfish miner MATCH competitor')
+            # print('Selfish miner MATCH competitor')
 
-            lead = self.blockchain.size() - first_competitor.blockchain.size()
+            req_diff = (self.mining_power / 100) - (first_competitor.mining_power / 100)
+            block_lead = self.blockchain.size() - first_competitor.blockchain.size()
+            lead = (self.get_fruit_count() / BLOCK_REWARD) - (first_competitor.get_fruit_count() / BLOCK_REWARD)
+
+            # print(f'self: {self.get_fruit_count() / BLOCK_REWARD}')
+            # print(f'competitor: {first_competitor.get_fruit_count() / BLOCK_REWARD}')
+            # if lead <= req_diff:
+                # print(lead)
+            # print(f'Lead: {lead}')
+            # print(f'Req Diff: {req_diff}')
 
             # is this attacker id among competing attackers
             if self.miner_id in [
@@ -80,11 +93,11 @@ class SelfishMinerStrategy(NakamotoSelfishMinerStrategy):
                 # He mined a new block and is currently the longest
                 self.action = SA.OVERRIDE
 
-            elif lead >= 2:
+            elif block_lead >= 2:
                 # He has the longest chain and don't care what other does
                 self.action = SA.WAIT
 
-            elif lead == 0:
+            elif (lead == 0) or (lead >= 0 and req_diff > 0 and lead <= req_diff):
                 # competitors have the same length as me but I started after ongoing competition
                 # (it means later fork) so I randomly choice from ongoing branches and publish
                 # my new block and integrate block to the main chain

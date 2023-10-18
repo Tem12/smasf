@@ -59,15 +59,15 @@ class HonestMinerStrategy(NakamotoHonestMinerStrategy):
         Returns:
             bool: Whether the fork is ongoing after the block is mined.
         """
-        self.log.info(
-            f"Honest miner: {self.miner_id} is leader of round: {mining_round}"
-        )
+        # self.log.info(
+        #     f"Honest miner: {self.miner_id} is leader of round: {mining_round}"
+        # )
         if ongoing_fork:
-            print('Honest miner MATCH competitor')
+            # print('Honest miner MATCH competitor')
             ongoing_fork = False
             if gamma == 0.5:
                 if random.random() <= 0.5:
-                    self.log.info("Previous blocks won selfish miner")
+                    # self.log.info("Previous blocks won selfish miner")
 
                     wining_selfish_miner = random.choice(match_competitors)
                     public_blockchain.override_chain(wining_selfish_miner)
