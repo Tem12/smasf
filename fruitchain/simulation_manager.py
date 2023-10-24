@@ -314,25 +314,79 @@ class SimulationManager(NakamotoSimulationManager):
 
         elif len(match_objects) == 1:
             # just one attacker in match phase
-            # match_obj = match_objects[0]
+            match_obj = match_objects[0]
 
-            # if self.config.gamma == 1:
-            #     # integrate attacker's last block to the public blockchain
-            #     self.log.info("SM wins")
-            #     self.public_blockchain.override_chain(match_obj)
-            #     match_obj.clear_private_chain()
-            #     self.action_store.remove_object(SA.MATCH, match_obj)
+            if match_obj is not self.honest_miner:
+                honest_fruit_count = self.honest_miner.get_fruit_count()
+                selfish_fruit_count = match_obj.get_fruit_count()
 
-            # else:
-            #     # gamma is 0 or 0.5. If 0 give attacker 1 round chance to mine new block
-            #     # If 0.5 give chance attacker to mine new block and also group of honest
-            #     # miners, which could possibly win the next round
-            #     self.ongoing_fork = True
-            self.ongoing_fork = True
+                if selfish_fruit_count > honest_fruit_count:
+                    self.resolve_fruit_match(match_obj, [self.honest_miner])
+                elif selfish_fruit_count == honest_fruit_count:
+                    if self.config.gamma == 1:
+                        self.resolve_fruit_match(match_obj, [])
+                    elif self.config.gamma == 0.5:
+                        winner = random.choice([match_obj, self.honest_miner])
+                        if winner == match_obj:
+                            self.resolve_fruit_match(match_obj, [])
+                    else:
+                    #     # gamma is 0 or 0.5. If 0 give attacker 1 round chance to mine new block
+                    #     # If 0.5 give chance attacker to mine new block and also group of honest
+                    #     # miners, which could possibly win the next round
+                    #     self.ongoing_fork = True
+                        self.ongoing_fork = True
 
         else:
-            # there is no ongoing fork and multiple attackers with match
-            self.ongoing_fork = True
+            max_fruit_miners = []
+            max_fruit_count = -1
+            for miner in match_objects:
+                fruit_count = miner.get_fruit_count()
+                if fruit_count > max_fruit_count:
+                    max_fruit_count = fruit_count
+                    max_fruit_miners = []
+                    max_fruit_miners.append(miner)
+                elif fruit_count == max_fruit_count:
+                    max_fruit_miners.append(miner)
+
+            if len(max_fruit_miners) == 1:
+                if max_fruit_miners[0] is not self.honest_miner:
+                    self.resolve_fruit_match(max_fruit_miners[0], [])
+            else:
+                isHonest = False
+                for miner in max_fruit_miners:
+                    if self.honest_miner == miner:
+                        isHonest = True
+                
+                if not isHonest:
+                    winner = random.choice(max_fruit_miners)
+                    self.resolve_fruit_match(winner, [])
+                else:
+                    if self.config.gamma == 1:
+                        # Remove honest from miners
+                        max_fruit_miners_selfish = []
+                        for miner in max_fruit_miners:
+                            if self.honest_miner is not miner:
+                                max_fruit_miners_selfish.append(miner)
+                        winner = random.choice(max_fruit_miners_selfish)
+                        self.resolve_fruit_match(winner, [])
+                    elif self.config.gamma == 0.5:
+                        winner = random.choice(max_fruit_miners_selfish)
+                        if winner is not self.honest_miner:
+                            self.resolve_fruit_match(winner, [])
+                    else:
+                        self.ongoing_fork = True
+
+    def resolve_fruit_match(self, winner, competitors):
+        if winner is not self.honest_miner:
+            self.public_blockchain.override_chain(winner)
+            winner.clear_private_chain()
+            self.action_store.remove_object(SA.MATCH, winner)
+
+        winner.clear_fruit_queue()
+        # for competitor in competitors:
+            # competitor.clear_fruit_queue()
+        for miner in self.miners:
+            miner.clear_fruit_queue()
 
     def choose_mining_action(self) -> FruitchainAction:
         choices_list = [FruitchainAction.MINE_FRUIT, FruitchainAction.MINE_BLOCK]

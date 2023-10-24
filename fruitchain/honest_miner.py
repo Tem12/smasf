@@ -66,14 +66,15 @@ class HonestMinerStrategy(NakamotoHonestMinerStrategy):
             # print('Honest miner MATCH competitor')
             ongoing_fork = False
             if gamma == 0.5:
-                if random.random() <= 0.5:
-                    # self.log.info("Previous blocks won selfish miner")
+                # if random.random() <= 0.5:
+                #     # self.log.info("Previous blocks won selfish miner")
 
-                    wining_selfish_miner = random.choice(match_competitors)
-                    public_blockchain.override_chain(wining_selfish_miner)
-                    # cleaning of competing SM is performed via ADOPT
-                    wining_selfish_miner.clear_private_chain()
-                    match_competitors.remove(wining_selfish_miner)
+                #     wining_selfish_miner = random.choice(match_competitors)
+                #     public_blockchain.override_chain(wining_selfish_miner)
+                #     # cleaning of competing SM is performed via ADOPT
+                #     wining_selfish_miner.clear_private_chain()
+                #     match_competitors.remove(wining_selfish_miner)
+                pass
 
         # public_blockchain.add_block(
         #     f"Block {mining_round} data", f"Honest miner {self.miner_id}", self.miner_id

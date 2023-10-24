@@ -126,6 +126,73 @@ class SelfishMinerStrategy(NakamotoSelfishMinerStrategy):
 
         return ongoing_fork
 
+    # def mine_new_block(
+    #     self,
+    #     mining_round: int,
+    #     public_blockchain: Blockchain,
+    #     ongoing_fork: bool,
+    #     match_competitors: Optional[Set["SelfishMinerStrategyBase"]] = None,
+    #     gamma: Optional[float] = None,
+    # ) -> bool:
+    #     """Mine a new block as a selfish miner for the Nakamoto consensus.
+
+    #     Args:
+    #         mining_round (int): The current mining round.
+    #         public_blockchain (Blockchain): The public blockchain.
+    #         ongoing_fork (bool): Indicates if there is an ongoing fork.
+    #         match_competitors (Set[SelfishMinerStrategyBase], optional): A set of competing
+    #                                                                      selfish miners.
+    #         gamma (float, optional): The gamma value for the simulation.
+
+    #     Returns:
+    #         bool: Whether the fork is ongoing after the block is mined.
+    #     """
+    #     self.update_private_blockchain(public_blockchain, mining_round)
+
+    #     if ongoing_fork:
+    #         first_competitor = list(match_competitors)[0]
+
+    #         lead = self.blockchain.size() - first_competitor.blockchain.size()
+
+    #         # is this attacker id among competing attackers
+    #         if self.miner_id in [
+    #             competitor.miner_id for competitor in match_competitors
+    #         ]:
+    #             # He mined a new block and is currently the longest
+    #             self.action = SA.OVERRIDE
+
+    #         elif lead >= 2:
+    #             # He has the longest chain and don't care what other does
+    #             self.action = SA.WAIT
+
+    #         elif lead == 0:
+    #             # competitors have the same length as me but I started after ongoing competition
+    #             # (it means later fork) so I randomly choice from ongoing branches and publish
+    #             # my new block and integrate block to the main chain
+    #             self.action = SA.MATCH
+
+    #             winner = random.choice(match_competitors + [public_blockchain])
+    #             if winner is not public_blockchain:
+    #                 public_blockchain.chain[-1] = winner.blockchain.chain[-1]
+
+    #             ongoing_fork = False
+    #             public_blockchain.override_chain(self)
+    #             public_blockchain.last_block_id += 1
+
+    #             # clearing of private chains of all attackers which are currently in MATCH
+    #             for attacker in match_competitors:
+    #                 attacker.clear_private_chain()
+
+    #         else:
+    #             # competitors have longer chain than me
+    #             self.clear_private_chain()
+    #             self.action = SA.ADOPT
+    #     else:
+    #         # no ongoing fork I currently mined new block
+    #         self.action = SA.WAIT
+
+    #     return ongoing_fork
+
     def update_private_blockchain(
         self, public_blockchain: Blockchain, mining_round: int
     ) -> None:
