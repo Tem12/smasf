@@ -227,7 +227,6 @@ def create_strongchain_simulation_queue():
                         "honest": {"mining_power": int(honest_mining_power[i])},
                         "selfish": [{"mining_power": int(SELFISH_MINERS[j][i])} for j in range(0, len(SELFISH_MINERS))],
                     },
-                    "gamma": GAMMA,
                     "simulation_mining_rounds": MINING_ROUNDS,
                     "weak_to_strong_header_ratio": WEAK_TO_STRONG_HEADER_RATIO
                 }
